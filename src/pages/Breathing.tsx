@@ -1,61 +1,39 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-type MoodType = "overwhelmed" | "anxious" | "sad" | "nervous" | "neutral" | "calm" | "energized";
-type BreathPhase = "inhale" | "hold-top" | "exhale" | "hold-bottom";
-const phaseConfig: Record<BreathPhase, {
-  text: string;
-  duration: number;
-  icon?: string;
-}> = {
-  inhale: {
-    text: "Inhale",
-    duration: 3,
-    icon: "↑"
-  },
-  "hold-top": {
-    text: "Hold",
-    duration: 5
-  },
-  exhale: {
-    text: "Exhale",
-    duration: 7,
-    icon: "↓"
-  },
-  "hold-bottom": {
-    text: "Hold",
-    duration: 5
-  }
-};
-const PHASES: BreathPhase[] = ["inhale", "hold-top", "exhale", "hold-bottom"];
-const TOTAL_DURATION = 20; // 3 + 5 + 7 + 5 = 20 seconds
 
-// Trapezoid path points
-const PATH = {
-  A: {
-    x: 40,
-    y: 160
-  },
-  // Bottom left (start)
-  B: {
-    x: 60,
-    y: 40
-  },
-  // Top left
-  C: {
-    x: 220,
-    y: 40
-  },
-  // Top right
-  D: {
-    x: 240,
-    y: 160
-  } // Bottom right
+type MoodType = "overwhelmed" | "anxious" | "sad" | "nervous" | "neutral" | "calm" | "energized";
+type BreathPhase = "inhale" | "hold" | "exhale";
+
+const phaseConfig: Record<BreathPhase, { text: string; duration: number }> = {
+  inhale: { text: "Inhale", duration: 4 },
+  hold: { text: "Hold", duration: 7 },
+  exhale: { text: "Exhale", duration: 8 },
 };
+
+const PHASES: BreathPhase[] = ["inhale", "hold", "exhale"];
+const TOTAL_DURATION = 19; // 4 + 7 + 8 = 19 seconds
+
+// Box path points (larger: 360x320 with padding)
+const PATH = {
+  A: { x: 30, y: 290 },   // Bottom left (start)
+  B: { x: 30, y: 30 },    // Top left
+  C: { x: 330, y: 30 },   // Top right
+  D: { x: 330, y: 290 },  // Bottom right (end)
+};
+
+// Segment colors
+const SEGMENT_COLORS = {
+  inhale: "#4A90E2",   // calm blue
+  hold: "#A8C5B5",     // soft teal/green
+  exhale: "#8B7EC8",   // soft purple
+};
+
 const Breathing = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const mood = location.state?.mood as MoodType || "calm";
+
   const [showIntro, setShowIntro] = useState(true);
   const [isIntroExiting, setIsIntroExiting] = useState(false);
   const [phase, setPhase] = useState<BreathPhase>("inhale");
@@ -65,47 +43,49 @@ const Breathing = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [showWellDone, setShowWellDone] = useState(false);
   const [completedSegments, setCompletedSegments] = useState<BreathPhase[]>([]);
-  const [dotProgress, setDotProgress] = useState(0); // 0-100 within current phase
+  const [dotProgress, setDotProgress] = useState(0);
+  const [textPulse, setTextPulse] = useState(false);
+  const [timerPulse, setTimerPulse] = useState(false);
 
   const handleSkip = useCallback(() => {
     setIsExiting(true);
     setTimeout(() => {
-      navigate("/quotes", {
-        state: {
-          mood
-        }
-      });
+      navigate("/quotes", { state: { mood } });
     }, 600);
   }, [navigate, mood]);
-
-  // No auto-transition - user clicks button to start
 
   // Breathing cycle logic
   useEffect(() => {
     if (showIntro) return;
+
     let phaseIndex = 0;
     let secondsInPhase = 0;
     let totalSeconds = 0;
+
     const interval = setInterval(() => {
       totalSeconds++;
       secondsInPhase++;
+
       const currentPhase = PHASES[phaseIndex];
       const phaseDuration = phaseConfig[currentPhase].duration;
 
       // Update dot progress (0-100 within current phase)
-      setDotProgress(secondsInPhase / phaseDuration * 100);
+      setDotProgress((secondsInPhase / phaseDuration) * 100);
 
-      // Update countdown
+      // Update countdown with pulse
       setPhaseTimeLeft(phaseDuration - secondsInPhase);
+      setTimerPulse(true);
+      setTimeout(() => setTimerPulse(false), 250);
 
       // Update total progress
-      setTotalProgress(totalSeconds / TOTAL_DURATION * 100);
+      setTotalProgress((totalSeconds / TOTAL_DURATION) * 100);
 
       // Check if phase is complete
       if (secondsInPhase >= phaseDuration) {
-        setCompletedSegments(prev => [...prev, currentPhase]);
+        setCompletedSegments((prev) => [...prev, currentPhase]);
         phaseIndex++;
         secondsInPhase = 0;
+
         if (phaseIndex >= PHASES.length) {
           // Breathing complete
           clearInterval(interval);
@@ -113,35 +93,37 @@ const Breathing = () => {
           setTimeout(() => {
             setIsExiting(true);
             setTimeout(() => {
-              navigate("/quotes", {
-                state: {
-                  mood
-                }
-              });
+              navigate("/quotes", { state: { mood } });
             }, 600);
-          }, 1000);
+          }, 1500);
           return;
         }
+
         setPhase(PHASES[phaseIndex]);
         setPhaseTimeLeft(phaseConfig[PHASES[phaseIndex]].duration);
         setDotProgress(0);
+        setTextPulse(true);
+        setTimeout(() => setTextPulse(false), 300);
       }
     }, 1000);
+
     return () => clearInterval(interval);
   }, [showIntro, navigate, mood]);
 
-  // Calculate dot position on the trapezoid path
+  // Calculate dot position on the box path
   const getDotPosition = () => {
     const phaseIndex = PHASES.indexOf(phase);
-    const points = [PATH.A, PATH.B, PATH.C, PATH.D, PATH.A];
+    const points = [PATH.A, PATH.B, PATH.C, PATH.D];
     const start = points[phaseIndex];
     const end = points[phaseIndex + 1];
     const progress = dotProgress / 100;
+
     return {
       x: start.x + (end.x - start.x) * progress,
-      y: start.y + (end.y - start.y) * progress
+      y: start.y + (end.y - start.y) * progress,
     };
   };
+
   const dotPos = getDotPosition();
 
   // Handle manual start
@@ -153,162 +135,316 @@ const Breathing = () => {
     }, 400);
   }, []);
 
+  // Get segment opacity based on state
+  const getSegmentStyle = (segmentPhase: BreathPhase) => {
+    const isCompleted = completedSegments.includes(segmentPhase);
+    const isActive = phase === segmentPhase && !completedSegments.includes(segmentPhase);
+    const isFuture = !isCompleted && !isActive;
+
+    if (isCompleted) {
+      return {
+        stroke: SEGMENT_COLORS[segmentPhase],
+        strokeOpacity: 0.5,
+        strokeDasharray: "none",
+      };
+    }
+    if (isActive) {
+      return {
+        stroke: SEGMENT_COLORS[segmentPhase],
+        strokeOpacity: 1,
+        strokeDasharray: "none",
+      };
+    }
+    // Future
+    return {
+      stroke: "#2C3E50",
+      strokeOpacity: 0.25,
+      strokeDasharray: "8 6",
+    };
+  };
+
   // Intro screen
   if (showIntro) {
-    return <main className={cn("min-h-screen w-full flex flex-col items-center justify-center px-8 transition-opacity duration-400", isIntroExiting ? "opacity-0" : "opacity-100")} style={{
-      backgroundColor: "#F5E6D3"
-    }}>
+    return (
+      <main
+        className={cn(
+          "min-h-screen w-full flex flex-col items-center justify-center px-8 transition-opacity duration-400",
+          isIntroExiting ? "opacity-0" : "opacity-100"
+        )}
+        style={{ backgroundColor: "#F5E6D3" }}
+      >
         <div className="text-center max-w-[380px]">
-          {/* Main headline */}
-          <h1 className="text-[28px] md:text-[32px] font-medium leading-[1.3] tracking-[-0.4px] opacity-0" style={{
-          fontFamily: "'Playfair Display', serif",
-          color: "#2C3E50",
-          animation: "fade-in-up 600ms ease-out forwards",
-          animationDelay: "0ms"
-        }}>Before we motivate you,       we balance you</h1>
+          <h1
+            className="text-[28px] md:text-[32px] font-medium leading-[1.3] tracking-[-0.4px] opacity-0"
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              color: "#2C3E50",
+              animation: "fade-in-up 600ms ease-out forwards",
+              animationDelay: "0ms",
+            }}
+          >
+            Before we motivate you, we balance you
+          </h1>
 
-          {/* Subtitle */}
-          <p className="mt-8 text-lg font-normal opacity-0" style={{
-          color: "#6B6B6B",
-          animation: "fade-in-up 500ms ease-out forwards",
-          animationDelay: "200ms"
-        }}>
+          <p
+            className="mt-8 text-lg font-normal opacity-0"
+            style={{
+              color: "#6B6B6B",
+              animation: "fade-in-up 500ms ease-out forwards",
+              animationDelay: "200ms",
+            }}
+          >
             Take 19 seconds for yourself
           </p>
 
-          {/* Scientific reference box */}
-          <div className="mt-12 py-4 px-5 rounded-xl opacity-0" style={{
-          backgroundColor: "rgba(255, 255, 255, 0.5)",
-          border: "1px solid rgba(44, 62, 80, 0.1)",
-          animation: "fade-in-up 500ms ease-out forwards",
-          animationDelay: "400ms"
-        }}>
-            <p className="text-xs font-semibold uppercase tracking-[0.5px]" style={{
-            color: "#2C3E50"
-          }}>Scientific Evidence-based Breathwork </p>
-            <p className="mt-2 text-[13px] font-normal" style={{
-            color: "#6B6B6B"
-          }}>
+          <div
+            className="mt-12 py-4 px-5 rounded-xl opacity-0"
+            style={{
+              backgroundColor: "rgba(255, 255, 255, 0.5)",
+              border: "1px solid rgba(44, 62, 80, 0.1)",
+              animation: "fade-in-up 500ms ease-out forwards",
+              animationDelay: "400ms",
+            }}
+          >
+            <p
+              className="text-xs font-semibold uppercase tracking-[0.5px]"
+              style={{ color: "#2C3E50" }}
+            >
+              Scientific Evidence
+            </p>
+            <p className="mt-2 text-[13px] font-normal" style={{ color: "#6B6B6B" }}>
               Spiegel & Huberman - Stanford Study | 2023
             </p>
           </div>
 
-          {/* CTA Button */}
-          <button onClick={handleStartBreathing} className="mt-14 w-full max-w-[300px] h-14 rounded-[28px] text-base font-medium transition-all duration-200 hover:scale-[1.02] opacity-0" style={{
-          backgroundColor: "#2C3E50",
-          color: "white",
-          boxShadow: "0 4px 16px rgba(44, 62, 80, 0.2)",
-          animation: "fade-in-up 500ms ease-out forwards",
-          animationDelay: "600ms"
-        }} onMouseEnter={e => {
-          e.currentTarget.style.backgroundColor = "#1A2634";
-          e.currentTarget.style.boxShadow = "0 6px 20px rgba(44, 62, 80, 0.25)";
-        }} onMouseLeave={e => {
-          e.currentTarget.style.backgroundColor = "#2C3E50";
-          e.currentTarget.style.boxShadow = "0 4px 16px rgba(44, 62, 80, 0.2)";
-        }}>
+          <button
+            onClick={handleStartBreathing}
+            className="mt-14 w-full max-w-[300px] h-14 rounded-[28px] text-base font-medium transition-all duration-200 hover:scale-[1.02] opacity-0"
+            style={{
+              backgroundColor: "#2C3E50",
+              color: "white",
+              boxShadow: "0 4px 16px rgba(44, 62, 80, 0.2)",
+              animation: "fade-in-up 500ms ease-out forwards",
+              animationDelay: "600ms",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "#1A2634";
+              e.currentTarget.style.boxShadow = "0 6px 20px rgba(44, 62, 80, 0.25)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "#2C3E50";
+              e.currentTarget.style.boxShadow = "0 4px 16px rgba(44, 62, 80, 0.2)";
+            }}
+          >
             Let's Breathe
           </button>
         </div>
-      </main>;
+      </main>
+    );
   }
 
   // Well done screen
   if (showWellDone) {
-    return <main className={cn("min-h-screen w-full flex items-center justify-center transition-opacity duration-500", isExiting ? "opacity-0" : "opacity-100")} style={{
-      backgroundColor: "#F5E6D3"
-    }}>
-        <h1 className="text-[32px] font-medium animate-fade-in" style={{
-        fontFamily: "'Playfair Display', serif",
-        color: "#2C3E50"
-      }}>
+    return (
+      <main
+        className={cn(
+          "min-h-screen w-full flex items-center justify-center transition-opacity duration-600",
+          isExiting ? "opacity-0" : "opacity-100"
+        )}
+        style={{ backgroundColor: "#F5E6D3" }}
+      >
+        <h1
+          className="text-[28px] font-medium animate-fade-in"
+          style={{
+            fontFamily: "'Playfair Display', serif",
+            color: "#2C3E50",
+          }}
+        >
           Well done
         </h1>
-      </main>;
+      </main>
+    );
   }
-  return <main className={cn("min-h-screen w-full flex flex-col items-center justify-center relative transition-all duration-500", isExiting ? "opacity-0 scale-95" : "opacity-100 scale-100", isLoaded ? "opacity-100" : "opacity-0")} style={{
-    backgroundColor: "#F5E6D3"
-  }}>
+
+  return (
+    <main
+      className={cn(
+        "min-h-screen w-full flex flex-col items-center justify-center relative transition-all duration-500",
+        isExiting ? "opacity-0" : "opacity-100",
+        isLoaded ? "opacity-100" : "opacity-0"
+      )}
+      style={{ backgroundColor: "#F5E6D3" }}
+    >
       {/* Skip button */}
-      <button onClick={handleSkip} className="absolute top-6 right-5 text-sm font-normal z-10 transition-all duration-200 hover:underline" style={{
-      color: "rgba(44, 62, 80, 0.6)"
-    }} onMouseEnter={e => e.currentTarget.style.color = "#2C3E50"} onMouseLeave={e => e.currentTarget.style.color = "rgba(44, 62, 80, 0.6)"} aria-label="Skip breathing exercise">
+      <button
+        onClick={handleSkip}
+        className="absolute top-7 right-5 text-[15px] font-normal z-10 transition-all duration-200 hover:underline"
+        style={{ color: "rgba(44, 62, 80, 0.6)" }}
+        onMouseEnter={(e) => (e.currentTarget.style.color = "#2C3E50")}
+        onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(44, 62, 80, 0.6)")}
+        aria-label="Skip breathing exercise"
+      >
         Skip
       </button>
 
       {/* Center content */}
       <div className="flex flex-col items-center">
         {/* Instruction text above path */}
-        <div key={phase} className="mb-10 text-center animate-fade-in">
-          <p className="text-xl font-medium" style={{
-          color: "#2C3E50"
-        }}>
-            {phaseConfig[phase].icon && <span className="mr-2">{phaseConfig[phase].icon}</span>}
+        <div
+          className="mb-[60px] text-center transition-all duration-400"
+          style={{
+            transform: textPulse ? "scale(1.08)" : "scale(1)",
+          }}
+        >
+          <p
+            className="text-[28px] md:text-[32px] font-semibold tracking-[-0.5px] animate-fade-in"
+            style={{ color: "#2C3E50" }}
+          >
             {phaseConfig[phase].text}
           </p>
         </div>
 
-        {/* Trapezoid path visualization */}
-        <svg width="280" height="200" viewBox="0 0 280 200" className="animate-scale-in">
-          {/* Segment 1: A→B (Inhale) - soft blue */}
-          <path d={`M ${PATH.A.x} ${PATH.A.y} L ${PATH.B.x} ${PATH.B.y}`} stroke="#B4D7E8" strokeWidth="3" fill="none" strokeLinecap="round" style={{
-          opacity: completedSegments.includes("inhale") ? 0.5 : 1,
-          transition: "opacity 300ms ease"
-        }} />
-          
-          {/* Segment 2: B→C (Hold top) - soft green */}
-          <path d={`M ${PATH.B.x} ${PATH.B.y} L ${PATH.C.x} ${PATH.C.y}`} stroke="#A8C5B5" strokeWidth="3" fill="none" strokeLinecap="round" style={{
-          opacity: completedSegments.includes("hold-top") ? 0.5 : 1,
-          transition: "opacity 300ms ease"
-        }} />
-          
-          {/* Segment 3: C→D (Exhale) - soft purple */}
-          <path d={`M ${PATH.C.x} ${PATH.C.y} L ${PATH.D.x} ${PATH.D.y}`} stroke="#D4C5E8" strokeWidth="3" fill="none" strokeLinecap="round" style={{
-          opacity: completedSegments.includes("exhale") ? 0.5 : 1,
-          transition: "opacity 300ms ease"
-        }} />
-          
-          {/* Segment 4: D→A (Hold bottom) - soft peach */}
-          <path d={`M ${PATH.D.x} ${PATH.D.y} L ${PATH.A.x} ${PATH.A.y}`} stroke="#FFD4A3" strokeWidth="3" fill="none" strokeLinecap="round" style={{
-          opacity: completedSegments.includes("hold-bottom") ? 0.5 : 1,
-          transition: "opacity 300ms ease"
-        }} />
+        {/* Box path visualization - larger */}
+        <svg
+          width="360"
+          height="320"
+          viewBox="0 0 360 320"
+          className="animate-scale-in w-[85vw] max-w-[360px] h-auto"
+        >
+          {/* Segment 1: A→B (Inhale) - vertical up */}
+          <path
+            d={`M ${PATH.A.x} ${PATH.A.y} L ${PATH.B.x} ${PATH.B.y}`}
+            strokeWidth="5"
+            fill="none"
+            strokeLinecap="round"
+            style={{
+              ...getSegmentStyle("inhale"),
+              transition: "all 300ms ease",
+            }}
+          />
+
+          {/* Segment 2: B→C (Hold) - horizontal right */}
+          <path
+            d={`M ${PATH.B.x} ${PATH.B.y} L ${PATH.C.x} ${PATH.C.y}`}
+            strokeWidth="5"
+            fill="none"
+            strokeLinecap="round"
+            style={{
+              ...getSegmentStyle("hold"),
+              transition: "all 300ms ease",
+            }}
+          />
+
+          {/* Segment 3: C→D (Exhale) - vertical down */}
+          <path
+            d={`M ${PATH.C.x} ${PATH.C.y} L ${PATH.D.x} ${PATH.D.y}`}
+            strokeWidth="5"
+            fill="none"
+            strokeLinecap="round"
+            style={{
+              ...getSegmentStyle("exhale"),
+              transition: "all 300ms ease",
+            }}
+          />
+
+          {/* Corner labels */}
+          {[
+            { point: PATH.A, label: "A", offset: { x: -25, y: 10 } },
+            { point: PATH.B, label: "B", offset: { x: -25, y: -5 } },
+            { point: PATH.C, label: "C", offset: { x: 25, y: -5 } },
+            { point: PATH.D, label: "D", offset: { x: 25, y: 10 } },
+          ].map(({ point, label, offset }) => (
+            <g key={label}>
+              <circle
+                cx={point.x + offset.x}
+                cy={point.y + offset.y}
+                r="18"
+                fill="white"
+                stroke="#E0E0E0"
+                strokeWidth="2"
+                style={{ filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.08))" }}
+              />
+              <text
+                x={point.x + offset.x}
+                y={point.y + offset.y + 6}
+                textAnchor="middle"
+                fontSize="18"
+                fontWeight="600"
+                fill="#2C3E50"
+                style={{ fontFamily: "Inter, sans-serif" }}
+              >
+                {label}
+              </text>
+            </g>
+          ))}
 
           {/* Moving dot indicator */}
-          <circle cx={dotPos.x} cy={dotPos.y} r="8" fill="#2C3E50" style={{
-          filter: "drop-shadow(0 2px 8px rgba(44, 62, 80, 0.2))",
-          transition: "cx 100ms linear, cy 100ms linear"
-        }} />
+          <circle
+            cx={dotPos.x}
+            cy={dotPos.y}
+            r="12"
+            fill="#2C3E50"
+            stroke="white"
+            strokeWidth="4"
+            style={{
+              filter: "drop-shadow(0 4px 12px rgba(44, 62, 80, 0.3))",
+              transition: "cx 100ms linear, cy 100ms linear",
+            }}
+          />
         </svg>
 
         {/* Countdown timer below path */}
-        <div className="mt-16">
-          <span key={phaseTimeLeft} className="text-5xl font-semibold animate-timer-pulse" style={{
-          color: "#2C3E50"
-        }}>
+        <div
+          className="mt-20 flex items-center justify-center rounded-full"
+          style={{
+            width: "120px",
+            height: "120px",
+            border: "6px solid #2C3E50",
+            backgroundColor: "rgba(255, 255, 255, 0.8)",
+            boxShadow: "0 6px 20px rgba(44, 62, 80, 0.15)",
+          }}
+        >
+          <span
+            className="text-[56px] font-bold transition-transform duration-250"
+            style={{
+              color: "#2C3E50",
+              transform: timerPulse ? "scale(1.15)" : "scale(1)",
+            }}
+          >
             {phaseTimeLeft}
           </span>
         </div>
       </div>
 
       {/* Progress bar at bottom */}
-      <div className="absolute bottom-8 left-8 right-8 flex flex-col items-center">
-        <div className="w-full max-w-[400px] h-1.5 rounded-full overflow-hidden" style={{
-        backgroundColor: "rgba(44, 62, 80, 0.2)"
-      }}>
-          <div className="h-full rounded-full transition-all duration-1000 ease-linear" style={{
-          width: `${totalProgress}%`,
-          backgroundColor: "#2C3E50"
-        }} />
+      <div className="absolute bottom-12 left-10 right-10 flex flex-col items-center">
+        {/* Phase labels above progress bar */}
+        <div
+          className="w-full max-w-[480px] flex justify-between mb-2 text-[11px] font-medium"
+          style={{ color: "#6B6B6B" }}
+        >
+          <span>Inhale (4s)</span>
+          <span>Hold (7s)</span>
+          <span>Exhale (8s)</span>
         </div>
-        
-        {/* Phase label below progress bar */}
-        <p className="mt-2 text-xs" style={{
-        color: "#6B6B6B"
-      }}>
-          {phaseConfig[phase].text}
-        </p>
+
+        {/* Progress bar */}
+        <div
+          className="w-full max-w-[480px] h-3 rounded-md overflow-hidden"
+          style={{ backgroundColor: "rgba(44, 62, 80, 0.2)" }}
+        >
+          <div
+            className="h-full rounded-md"
+            style={{
+              width: `${totalProgress}%`,
+              backgroundColor: "#2C3E50",
+              transition: "width 1000ms linear",
+            }}
+          />
+        </div>
       </div>
-    </main>;
+    </main>
+  );
 };
+
 export default Breathing;
