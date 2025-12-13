@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Heart, Share2, ArrowRight, X } from "lucide-react";
+import { Heart, Share2, ArrowLeft, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 
@@ -261,14 +261,21 @@ const Quotes = () => {
   }, [mood]);
 
   const currentQuote = filteredQuotes[currentQuoteIndex];
+  const isLastQuote = currentQuoteIndex === filteredQuotes.length - 1;
 
   const handleNextQuote = () => {
     if (filteredQuotes.length === 0) return;
     
+    // If on last quote, navigate to mood selection
+    if (isLastQuote) {
+      navigate("/mood-selection");
+      return;
+    }
+    
     setIsCardAnimating(true);
     
     setTimeout(() => {
-      const nextIndex = (currentQuoteIndex + 1) % filteredQuotes.length;
+      const nextIndex = currentQuoteIndex + 1;
       setCurrentQuoteIndex(nextIndex);
       setIsCardAnimating(false);
     }, 300);
@@ -321,43 +328,56 @@ const Quotes = () => {
       className="min-h-screen w-full flex flex-col relative"
       style={{ backgroundColor: "#F5E6D3" }}
     >
-      {/* Top Section: Mood Badge & Back Button */}
+      {/* Top Header: Back Arrow & Close Button */}
       <div
         className={cn(
           "flex items-center justify-between px-6 pt-6 transition-all duration-300",
           isLoaded ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"
         )}
       >
-        {/* Mood Badge */}
-        <div
-          className="flex items-center gap-2 px-4 py-2 rounded-[18px]"
-          style={{
-            backgroundColor: "rgba(255, 255, 255, 0.7)",
-            border: "1.5px solid #2C3E50",
-          }}
-        >
-          <span className="text-base">{moodEmojis[mood]}</span>
-          <span
-            className="text-[13px] font-semibold"
-            style={{ color: "#2C3E50", fontFamily: "Inter, sans-serif" }}
-          >
-            {moodLabels[mood]}
-          </span>
-        </div>
-
-        {/* Back Button */}
+        {/* Back Arrow */}
         <button
           onClick={handleBack}
           className="w-10 h-10 flex items-center justify-center rounded-full transition-all duration-200 hover:scale-105 active:scale-95"
           style={{ color: "rgba(44, 62, 80, 0.6)" }}
           aria-label="Go back"
         >
+          <ArrowLeft size={24} />
+        </button>
+
+        {/* Close Button */}
+        <button
+          onClick={() => navigate("/")}
+          className="w-10 h-10 flex items-center justify-center rounded-full transition-all duration-200 hover:scale-105 active:scale-95"
+          style={{ color: "rgba(44, 62, 80, 0.6)" }}
+          aria-label="Close"
+        >
           <X size={24} />
         </button>
       </div>
 
-      {/* Center Section: Quote Card */}
-      <div className="flex-1 flex items-center justify-center px-6 py-8">
+      {/* Center Section: Mood Label Bar + Quote Card */}
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-8">
+        {/* Mood Label Bar */}
+        <div
+          className={cn(
+            "w-full max-w-[380px] h-[54px] rounded-3xl flex items-center justify-center mb-4 transition-all duration-300",
+            isLoaded ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"
+          )}
+          style={{
+            backgroundColor: "white",
+            boxShadow: "0 4px 16px rgba(44, 62, 80, 0.08)",
+            padding: "0 24px",
+            transitionDelay: isLoaded ? "150ms" : "0ms",
+          }}
+        >
+          <span
+            className="text-base font-semibold"
+            style={{ color: "#2C3E50", fontFamily: "Inter, sans-serif" }}
+          >
+            {moodEmojis[mood]} {moodLabels[mood]}
+          </span>
+        </div>
         <div
           className={cn(
             "w-full max-w-[380px] min-h-[420px] rounded-3xl flex flex-col transition-all duration-400",
@@ -437,7 +457,7 @@ const Quotes = () => {
       >
         <button
           onClick={handleNextQuote}
-          className="w-full max-w-[340px] h-14 rounded-[28px] text-base font-medium flex items-center justify-center gap-3 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+          className="w-full max-w-[340px] h-14 rounded-[28px] text-lg font-semibold flex items-center justify-center transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
           style={{
             backgroundColor: "#2C3E50",
             color: "white",
@@ -445,8 +465,7 @@ const Quotes = () => {
             fontFamily: "Inter, sans-serif",
           }}
         >
-          Next Quote
-          <ArrowRight size={20} />
+          {isLastQuote ? "Pick Another Mood" : `(${currentQuoteIndex + 1}/${filteredQuotes.length})`}
         </button>
       </div>
     </main>
