@@ -47,8 +47,7 @@ const MoodSelection = () => {
     setSelectedMood(moodId);
   };
   const handleContinue = () => {
-    // Future: Navigate to breathing screen with selected mood
-    console.log("Continuing with mood:", selectedMood);
+    navigate("/breathing", { state: { mood: selectedMood } });
   };
   return <main className="min-h-screen bg-background flex flex-col animate-page-enter">
       {/* Fixed Header */}
