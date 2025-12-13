@@ -41,11 +41,11 @@
     --navy-dark: 210 35% 15%; /* Darker navy #1A2634 */
     --coral-soft: 25 100% 77%;
     --warm-gray: 0 0% 60%; /* #999 */
+    --footer: 0 0% 63%; /* #A0A0A0 */
 
     /* Shadows */
     --shadow-button: 0 4px 12px hsla(210, 28%, 24%, 0.15);
     --shadow-button-hover: 0 6px 16px hsla(210, 28%, 24%, 0.2);
-
     /* Sidebar (keeping defaults) */
     --sidebar-background: 30 33% 94%;
     --sidebar-foreground: 210 28% 24%;
@@ -114,21 +114,40 @@
   }
 }
 
-/* Floating animation for decorative elements */
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0);
+/* Nudge bounce animation for logo */
+@keyframes nudge-bounce {
+  0% {
+    opacity: 0;
+    transform: translateX(-4px);
   }
   50% {
-    transform: translateY(-8px);
+    transform: translateX(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
 
-.animate-float {
-  animation: float 3s ease-in-out infinite;
+.animate-nudge-bounce {
+  animation: nudge-bounce 0.6s ease-out forwards;
 }
 
-/* Fade transition for page navigation */
+/* Fade in animation */
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out forwards;
+}
+
+/* Fade in with slide up */
 @keyframes fade-in-up {
   0% {
     opacity: 0;
@@ -141,21 +160,26 @@
 }
 
 .animate-fade-in-up {
-  animation: fade-in-up 0.6s ease-out forwards;
+  animation: fade-in-up 0.4s ease-out forwards;
 }
 
-.animation-delay-100 {
-  animation-delay: 100ms;
+/* Animation delays for staggered entrance */
+.animation-delay-0 {
+  animation-delay: 0ms;
 }
 
 .animation-delay-200 {
   animation-delay: 200ms;
 }
 
-.animation-delay-300 {
-  animation-delay: 300ms;
-}
-
 .animation-delay-400 {
   animation-delay: 400ms;
+}
+
+.animation-delay-600 {
+  animation-delay: 600ms;
+}
+
+.animation-delay-800 {
+  animation-delay: 800ms;
 }
