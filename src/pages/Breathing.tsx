@@ -14,12 +14,12 @@ const phaseConfig: Record<BreathPhase, { text: string; duration: number }> = {
 const PHASES: BreathPhase[] = ["inhale", "hold", "exhale"];
 const TOTAL_DURATION = 19; // 4 + 7 + 8 = 19 seconds
 
-// Box path points (larger: 360x320 with padding)
+// Box path points (with more padding for labels)
 const PATH = {
-  A: { x: 30, y: 290 },   // Bottom left (start)
-  B: { x: 30, y: 30 },    // Top left
-  C: { x: 330, y: 30 },   // Top right
-  D: { x: 330, y: 290 },  // Bottom right (end)
+  A: { x: 50, y: 280 },   // Bottom left (start)
+  B: { x: 50, y: 40 },    // Top left
+  C: { x: 310, y: 40 },   // Top right
+  D: { x: 310, y: 280 },  // Bottom right (end)
 };
 
 // Segment colors
@@ -347,35 +347,26 @@ const Breathing = () => {
             }}
           />
 
-          {/* Corner labels */}
+          {/* Corner labels - text only, no circles */}
           {[
-            { point: PATH.A, label: "A", offset: { x: -25, y: 10 } },
-            { point: PATH.B, label: "B", offset: { x: -25, y: -5 } },
-            { point: PATH.C, label: "C", offset: { x: 25, y: -5 } },
-            { point: PATH.D, label: "D", offset: { x: 25, y: 10 } },
+            { point: PATH.A, label: "A", offset: { x: -20, y: 8 } },
+            { point: PATH.B, label: "B", offset: { x: -20, y: 0 } },
+            { point: PATH.C, label: "C", offset: { x: 20, y: 0 } },
+            { point: PATH.D, label: "D", offset: { x: 20, y: 8 } },
           ].map(({ point, label, offset }) => (
-            <g key={label}>
-              <circle
-                cx={point.x + offset.x}
-                cy={point.y + offset.y}
-                r="18"
-                fill="white"
-                stroke="#E0E0E0"
-                strokeWidth="2"
-                style={{ filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.08))" }}
-              />
-              <text
-                x={point.x + offset.x}
-                y={point.y + offset.y + 6}
-                textAnchor="middle"
-                fontSize="18"
-                fontWeight="600"
-                fill="#2C3E50"
-                style={{ fontFamily: "Inter, sans-serif" }}
-              >
-                {label}
-              </text>
-            </g>
+            <text
+              key={label}
+              x={point.x + offset.x}
+              y={point.y + offset.y}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              fontSize="16"
+              fontWeight="600"
+              fill="#2C3E50"
+              style={{ fontFamily: "Inter, sans-serif" }}
+            >
+              {label}
+            </text>
           ))}
 
           {/* Moving dot indicator */}
