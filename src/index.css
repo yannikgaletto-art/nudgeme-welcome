@@ -133,6 +133,20 @@
   animation: nudge-bounce 0.6s ease-out forwards;
 }
 
+/* Circle nudge animation - moves left and right */
+@keyframes nudge-circle {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(6px);
+  }
+}
+
+.animate-nudge-circle {
+  animation: nudge-circle 2s ease-in-out infinite;
+}
+
 /* Fade in animation */
 @keyframes fade-in {
   0% {

@@ -17,7 +17,7 @@ const NudgeLogo = () => {
         stroke="currentColor"
         strokeWidth="2"
         fill="none"
-        className="text-foreground"
+        className="text-foreground animate-nudge-circle"
       />
       
       {/* Small nudging element - curved finger/shape */}
