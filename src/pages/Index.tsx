@@ -1,14 +1,25 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import NudgeLogo from "@/components/NudgeLogo";
+import { cn } from "@/lib/utils";
 
 const Index = () => {
+  const navigate = useNavigate();
+  const [isExiting, setIsExiting] = useState(false);
+
   const handleBegin = () => {
-    // Future: navigate to next screen with fade transition
-    console.log("Beginning mindfulness session...");
+    setIsExiting(true);
+    setTimeout(() => {
+      navigate("/mood");
+    }, 300);
   };
 
   return (
-    <main className="min-h-screen bg-background flex flex-col items-center justify-center px-6 relative">
+    <main className={cn(
+      "min-h-screen bg-background flex flex-col items-center justify-center px-6 relative transition-opacity duration-300",
+      isExiting && "opacity-0"
+    )}>
       {/* Centered Content Stack */}
       <div className="flex flex-col items-center max-w-[400px] w-full">
         {/* Logo */}

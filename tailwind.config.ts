@@ -82,6 +82,9 @@ export default {
       boxShadow: {
         button: "var(--shadow-button)",
         "button-hover": "var(--shadow-button-hover)",
+        "mood-hover": "0 6px 16px rgba(44, 62, 80, 0.12)",
+        "mood-selected": "0 8px 24px rgba(44, 62, 80, 0.2)",
+        "continue": "0 4px 16px rgba(44, 62, 80, 0.25)",
       },
       letterSpacing: {
         tight: "-0.5px",
