@@ -4,28 +4,216 @@ import { Heart, Share2, RefreshCw, ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type MoodType = "overwhelmed" | "anxious" | "sad" | "nervous" | "neutral" | "calm" | "energized";
-type FilterType = "all" | "stoic" | "mindful" | "modern";
+type VoiceType = "stoic" | "mindful" | "modern";
+type FilterType = "all" | VoiceType;
 
 interface Quote {
   id: string;
   text: string;
   author: string;
-  category: FilterType;
+  voice: VoiceType;
+  primaryMood: MoodType;
+  intentTags: string[];
+  gradient: number;
 }
 
 const quotes: Quote[] = [
-  { id: "1", text: "The happiness of your life depends upon the quality of your thoughts.", author: "Marcus Aurelius", category: "stoic" },
-  { id: "2", text: "He who fears death will never do anything worthy of a living man.", author: "Seneca", category: "stoic" },
-  { id: "3", text: "Waste no more time arguing about what a good man should be. Be one.", author: "Marcus Aurelius", category: "stoic" },
-  { id: "4", text: "The present moment is filled with joy and happiness. If you are attentive, you will see it.", author: "Thich Nhat Hanh", category: "mindful" },
-  { id: "5", text: "Feelings come and go like clouds in a windy sky. Conscious breathing is my anchor.", author: "Thich Nhat Hanh", category: "mindful" },
-  { id: "6", text: "Be where you are, not where you think you should be.", author: "Unknown", category: "mindful" },
-  { id: "7", text: "You are not your thoughts. You are the observer of your thoughts.", author: "Eckhart Tolle", category: "modern" },
-  { id: "8", text: "Almost everything will work again if you unplug it for a few minutes, including you.", author: "Anne Lamott", category: "modern" },
-  { id: "9", text: "Self-care is not selfish. You cannot serve from an empty vessel.", author: "Eleanor Brown", category: "modern" },
-  { id: "10", text: "It is not the man who has too little, but the man who craves more, that is poor.", author: "Seneca", category: "stoic" },
-  { id: "11", text: "Smile, breathe, and go slowly.", author: "Thich Nhat Hanh", category: "mindful" },
-  { id: "12", text: "You don't have to control your thoughts. You just have to stop letting them control you.", author: "Dan Millman", category: "modern" },
+  // OVERWHELMED quotes
+  {
+    id: "1",
+    text: "You have power over your mind—not outside events. Realize this, and you will find strength.",
+    author: "Marcus Aurelius",
+    voice: "stoic",
+    primaryMood: "overwhelmed",
+    intentTags: ["control", "strength", "perspective"],
+    gradient: 2,
+  },
+  {
+    id: "2",
+    text: "Almost everything will work again if you unplug it for a few minutes, including you.",
+    author: "Anne Lamott",
+    voice: "modern",
+    primaryMood: "overwhelmed",
+    intentTags: ["rest", "perspective", "clarity"],
+    gradient: 4,
+  },
+  {
+    id: "3",
+    text: "You are the sky. Everything else is just the weather.",
+    author: "Pema Chödrön",
+    voice: "mindful",
+    primaryMood: "overwhelmed",
+    intentTags: ["perspective", "peace", "acceptance"],
+    gradient: 3,
+  },
+  // ANXIOUS quotes
+  {
+    id: "4",
+    text: "Breathing in, I calm body and mind. Breathing out, I smile.",
+    author: "Thich Nhat Hanh",
+    voice: "mindful",
+    primaryMood: "anxious",
+    intentTags: ["calm", "breathing", "present"],
+    gradient: 3,
+  },
+  {
+    id: "5",
+    text: "We suffer more often in imagination than in reality.",
+    author: "Seneca",
+    voice: "stoic",
+    primaryMood: "anxious",
+    intentTags: ["calm", "perspective", "reality"],
+    gradient: 6,
+  },
+  {
+    id: "6",
+    text: "Nothing diminishes anxiety faster than action.",
+    author: "Walter Anderson",
+    voice: "modern",
+    primaryMood: "anxious",
+    intentTags: ["action", "calm", "momentum"],
+    gradient: 7,
+  },
+  // SAD quotes
+  {
+    id: "7",
+    text: "The wound is the place where the Light enters you.",
+    author: "Rumi",
+    voice: "mindful",
+    primaryMood: "sad",
+    intentTags: ["hope", "growth", "resilience"],
+    gradient: 5,
+  },
+  {
+    id: "8",
+    text: "Sometimes the bad things that happen in our lives put us directly on the path to the best things that will ever happen to us.",
+    author: "Nicole Reed",
+    voice: "modern",
+    primaryMood: "sad",
+    intentTags: ["hope", "perspective", "growth"],
+    gradient: 4,
+  },
+  {
+    id: "9",
+    text: "The best revenge is not to be like your enemy.",
+    author: "Marcus Aurelius",
+    voice: "stoic",
+    primaryMood: "sad",
+    intentTags: ["strength", "perspective", "dignity"],
+    gradient: 1,
+  },
+  // NERVOUS quotes
+  {
+    id: "10",
+    text: "The courage to be vulnerable is not about winning or losing, it's about showing up.",
+    author: "Brené Brown",
+    voice: "modern",
+    primaryMood: "nervous",
+    intentTags: ["courage", "confidence", "acceptance"],
+    gradient: 5,
+  },
+  {
+    id: "11",
+    text: "It's not what happens to you, but how you react to it that matters.",
+    author: "Epictetus",
+    voice: "stoic",
+    primaryMood: "nervous",
+    intentTags: ["control", "reassurance", "strength"],
+    gradient: 2,
+  },
+  {
+    id: "12",
+    text: "The present moment is the only time over which we have dominion.",
+    author: "Thich Nhat Hanh",
+    voice: "mindful",
+    primaryMood: "nervous",
+    intentTags: ["present", "control", "calm"],
+    gradient: 3,
+  },
+  // NEUTRAL quotes
+  {
+    id: "13",
+    text: "The quieter you become, the more you can hear.",
+    author: "Ram Dass",
+    voice: "mindful",
+    primaryMood: "neutral",
+    intentTags: ["wisdom", "reflection", "peace"],
+    gradient: 6,
+  },
+  {
+    id: "14",
+    text: "Be where you are; otherwise you will miss your life.",
+    author: "Buddha",
+    voice: "mindful",
+    primaryMood: "neutral",
+    intentTags: ["present", "wisdom", "mindfulness"],
+    gradient: 3,
+  },
+  {
+    id: "15",
+    text: "The cost of a thing is the amount of life you exchange for it.",
+    author: "Henry David Thoreau",
+    voice: "modern",
+    primaryMood: "neutral",
+    intentTags: ["wisdom", "perspective", "values"],
+    gradient: 1,
+  },
+  // CALM quotes
+  {
+    id: "16",
+    text: "A calm mind, a fit body, and a house full of love. These things cannot be bought—they must be earned.",
+    author: "Naval Ravikant",
+    voice: "modern",
+    primaryMood: "calm",
+    intentTags: ["gratitude", "contentment", "values"],
+    gradient: 7,
+  },
+  {
+    id: "17",
+    text: "When you realize there is nothing lacking, the whole world belongs to you.",
+    author: "Lao Tzu",
+    voice: "mindful",
+    primaryMood: "calm",
+    intentTags: ["contentment", "peace", "gratitude"],
+    gradient: 3,
+  },
+  {
+    id: "18",
+    text: "He who is not satisfied with a little, is satisfied with nothing.",
+    author: "Epicurus",
+    voice: "stoic",
+    primaryMood: "calm",
+    intentTags: ["contentment", "gratitude", "wisdom"],
+    gradient: 6,
+  },
+  // ENERGIZED quotes
+  {
+    id: "19",
+    text: "You do not rise to the level of your goals. You fall to the level of your systems.",
+    author: "James Clear",
+    voice: "modern",
+    primaryMood: "energized",
+    intentTags: ["action", "systems", "achievement"],
+    gradient: 7,
+  },
+  {
+    id: "20",
+    text: "Luck is what happens when preparation meets opportunity.",
+    author: "Seneca",
+    voice: "stoic",
+    primaryMood: "energized",
+    intentTags: ["action", "preparation", "momentum"],
+    gradient: 4,
+  },
+  {
+    id: "21",
+    text: "The journey of a thousand miles begins with one step.",
+    author: "Lao Tzu",
+    voice: "mindful",
+    primaryMood: "energized",
+    intentTags: ["action", "beginning", "momentum"],
+    gradient: 5,
+  },
 ];
 
 const filters: { label: string; value: FilterType }[] = [
@@ -41,11 +229,25 @@ const Quotes = () => {
   const mood = (location.state?.mood as MoodType) || "calm";
 
   const [activeFilter, setActiveFilter] = useState<FilterType>("all");
-  const [currentQuote, setCurrentQuote] = useState<Quote>(quotes[0]);
+  const [currentQuote, setCurrentQuote] = useState<Quote | null>(null);
   const [savedQuotes, setSavedQuotes] = useState<string[]>([]);
   const [showSaved, setShowSaved] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isCardAnimating, setIsCardAnimating] = useState(false);
+
+  // Sort quotes with mood-matched ones first
+  const getSortedQuotes = (voiceFilter: FilterType = "all") => {
+    let filtered = voiceFilter === "all" 
+      ? [...quotes] 
+      : quotes.filter((q) => q.voice === voiceFilter);
+    
+    // Sort: primary mood matches first
+    return filtered.sort((a, b) => {
+      const aMatch = a.primaryMood === mood ? 0 : 1;
+      const bMatch = b.primaryMood === mood ? 0 : 1;
+      return aMatch - bMatch;
+    });
+  };
 
   useEffect(() => {
     // Fade in on mount
@@ -53,19 +255,23 @@ const Quotes = () => {
     // Load saved quotes from localStorage
     const saved = localStorage.getItem("savedQuotes");
     if (saved) setSavedQuotes(JSON.parse(saved));
-  }, []);
+    // Set initial quote based on mood
+    const sorted = getSortedQuotes();
+    if (sorted.length > 0) {
+      setCurrentQuote(sorted[0]);
+    }
+  }, [mood]);
 
   const getFilteredQuotes = () => {
     if (showSaved) {
       return quotes.filter((q) => savedQuotes.includes(q.id));
     }
-    if (activeFilter === "all") return quotes;
-    return quotes.filter((q) => q.category === activeFilter);
+    return getSortedQuotes(activeFilter);
   };
 
   const handleNextQuote = () => {
     const filtered = getFilteredQuotes();
-    if (filtered.length === 0) return;
+    if (filtered.length === 0 || !currentQuote) return;
     
     setIsCardAnimating(true);
     setTimeout(() => {
@@ -77,6 +283,7 @@ const Quotes = () => {
   };
 
   const handleSaveQuote = () => {
+    if (!currentQuote) return;
     const newSaved = savedQuotes.includes(currentQuote.id)
       ? savedQuotes.filter((id) => id !== currentQuote.id)
       : [...savedQuotes, currentQuote.id];
@@ -86,6 +293,7 @@ const Quotes = () => {
   };
 
   const handleShare = async () => {
+    if (!currentQuote) return;
     const shareText = `"${currentQuote.text}" — ${currentQuote.author}`;
     if (navigator.share) {
       await navigator.share({ text: shareText });
@@ -97,9 +305,9 @@ const Quotes = () => {
   const handleFilterChange = (filter: FilterType) => {
     setActiveFilter(filter);
     setShowSaved(false);
-    const filtered = filter === "all" ? quotes : quotes.filter((q) => q.category === filter);
-    if (filtered.length > 0) {
-      setCurrentQuote(filtered[0]);
+    const sorted = getSortedQuotes(filter);
+    if (sorted.length > 0) {
+      setCurrentQuote(sorted[0]);
     }
   };
 
@@ -111,7 +319,9 @@ const Quotes = () => {
     }
   };
 
-  const isSaved = savedQuotes.includes(currentQuote.id);
+  const isSaved = currentQuote ? savedQuotes.includes(currentQuote.id) : false;
+
+  if (!currentQuote) return null;
 
   return (
     <main
@@ -190,29 +400,26 @@ const Quotes = () => {
       <div className="flex-1 flex items-center justify-center px-6 py-8">
         <div
           className={cn(
-            "w-full max-w-[420px] rounded-3xl p-8 flex flex-col justify-center transition-all duration-200",
+            "w-full max-w-[380px] min-h-[400px] max-h-[600px] rounded-3xl flex flex-col transition-all duration-200",
             isCardAnimating && "opacity-0 scale-95"
           )}
           style={{
-            aspectRatio: "4/5",
             backgroundColor: "white",
             boxShadow: "0 8px 32px rgba(44, 62, 80, 0.12)",
+            padding: "40px 32px",
           }}
         >
           {/* Quote category badge */}
-          <div
-            className="self-start px-3 py-1 rounded-full text-xs font-medium uppercase tracking-wide mb-6"
-            style={{
-              backgroundColor: "rgba(44, 62, 80, 0.08)",
-              color: "#2C3E50",
-            }}
+          <span
+            className="text-[11px] font-semibold uppercase tracking-[1px] mb-6"
+            style={{ color: "rgba(44, 62, 80, 0.6)" }}
           >
-            {currentQuote.category}
-          </div>
+            {currentQuote.voice}
+          </span>
 
           {/* Quote text */}
           <blockquote
-            className="text-[22px] md:text-[26px] font-medium leading-[1.4] tracking-[-0.3px]"
+            className="text-[24px] md:text-[26px] font-medium leading-[1.5] mb-7"
             style={{
               fontFamily: "'Playfair Display', serif",
               color: "#2C3E50",
@@ -221,16 +428,16 @@ const Quotes = () => {
             "{currentQuote.text}"
           </blockquote>
 
-          {/* Author */}
+          {/* Author - pushed to bottom with mt-auto */}
           <p
-            className="mt-6 text-base font-medium"
-            style={{ color: "#6B6B6B" }}
+            className="text-[15px] font-normal mt-auto"
+            style={{ color: "rgba(44, 62, 80, 0.7)" }}
           >
             — {currentQuote.author}
           </p>
 
           {/* Card action icons */}
-          <div className="flex items-center gap-4 mt-auto pt-8">
+          <div className="flex items-center gap-4 mt-6">
             <button
               onClick={handleSaveQuote}
               className="p-3 rounded-full transition-all duration-200 hover:scale-110"
