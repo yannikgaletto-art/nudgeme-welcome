@@ -397,18 +397,19 @@ const Breathing = () => {
         <div
           className="mt-20 flex items-center justify-center rounded-full"
           style={{
-            width: "120px",
-            height: "120px",
-            border: "6px solid #2C3E50",
-            backgroundColor: "rgba(255, 255, 255, 0.8)",
-            boxShadow: "0 6px 20px rgba(44, 62, 80, 0.15)",
+            width: "100px",
+            height: "100px",
+            border: "2px solid #2C3E50",
+            backgroundColor: "rgba(255, 255, 255, 0.3)",
           }}
         >
           <span
-            className="text-[56px] font-bold transition-transform duration-250"
+            className="text-[52px] font-semibold transition-transform"
             style={{
               color: "#2C3E50",
-              transform: timerPulse ? "scale(1.15)" : "scale(1)",
+              transform: timerPulse ? "scale(1.12)" : "scale(1)",
+              transitionDuration: "200ms",
+              transitionTimingFunction: "ease-out",
             }}
           >
             {phaseTimeLeft}
