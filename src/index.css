@@ -294,3 +294,22 @@
 .animate-scale-in {
   animation: scale-in 400ms ease-out forwards;
 }
+
+/* Text pulse for breathing instruction */
+@keyframes text-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-text-pulse {
+  animation: text-pulse 300ms ease-out;
+}
