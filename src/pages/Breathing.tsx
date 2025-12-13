@@ -47,22 +47,7 @@ const Breathing = () => {
     }, 600);
   }, [navigate, mood]);
 
-  // Intro screen timer
-  useEffect(() => {
-    const fadeTimer = setTimeout(() => {
-      setIsIntroExiting(true);
-    }, 3000);
-
-    const transitionTimer = setTimeout(() => {
-      setShowIntro(false);
-      setIsLoaded(true);
-    }, 3400);
-
-    return () => {
-      clearTimeout(fadeTimer);
-      clearTimeout(transitionTimer);
-    };
-  }, []);
+  // No auto-transition - user clicks button to start
 
   // Breathing cycle logic
   useEffect(() => {
@@ -135,29 +120,97 @@ const Breathing = () => {
 
   const dotPos = getDotPosition();
 
+  // Handle manual start
+  const handleStartBreathing = useCallback(() => {
+    setIsIntroExiting(true);
+    setTimeout(() => {
+      setShowIntro(false);
+      setIsLoaded(true);
+    }, 400);
+  }, []);
+
   // Intro screen
   if (showIntro) {
     return (
       <main
         className={cn(
-          "min-h-screen w-full flex flex-col items-center justify-center px-6 transition-opacity duration-400",
+          "min-h-screen w-full flex flex-col items-center justify-center px-8 transition-opacity duration-400",
           isIntroExiting ? "opacity-0" : "opacity-100"
         )}
         style={{ backgroundColor: "#F5E6D3" }}
       >
-        <div className="text-center max-w-[320px] animate-fade-in">
+        <div className="text-center max-w-[380px]">
+          {/* Main headline */}
           <h1
-            className="text-[28px] font-medium leading-[1.4] tracking-[-0.3px]"
-            style={{ fontFamily: "'Playfair Display', serif", color: "#2C3E50" }}
+            className="text-[28px] md:text-[32px] font-medium leading-[1.3] tracking-[-0.4px] opacity-0"
+            style={{ 
+              fontFamily: "'Playfair Display', serif", 
+              color: "#2C3E50",
+              animation: "fade-in-up 600ms ease-out forwards",
+              animationDelay: "0ms"
+            }}
           >
             Before we motivate you, we balance you
           </h1>
+
+          {/* Subtitle */}
           <p
-            className="mt-6 text-base font-normal"
-            style={{ color: "#6B6B6B" }}
+            className="mt-8 text-lg font-normal opacity-0"
+            style={{ 
+              color: "#6B6B6B",
+              animation: "fade-in-up 500ms ease-out forwards",
+              animationDelay: "200ms"
+            }}
           >
-            Take 15 seconds with yourself
+            Take 19 seconds for yourself
           </p>
+
+          {/* Scientific reference box */}
+          <div
+            className="mt-12 py-4 px-5 rounded-xl opacity-0"
+            style={{
+              backgroundColor: "rgba(255, 255, 255, 0.5)",
+              border: "1px solid rgba(44, 62, 80, 0.1)",
+              animation: "fade-in-up 500ms ease-out forwards",
+              animationDelay: "400ms"
+            }}
+          >
+            <p
+              className="text-xs font-semibold uppercase tracking-[0.5px]"
+              style={{ color: "#2C3E50" }}
+            >
+              Scientific Evidence
+            </p>
+            <p
+              className="mt-2 text-[13px] font-normal"
+              style={{ color: "#6B6B6B" }}
+            >
+              Spiegel & Huberman - Stanford Study | 2023
+            </p>
+          </div>
+
+          {/* CTA Button */}
+          <button
+            onClick={handleStartBreathing}
+            className="mt-14 w-full max-w-[300px] h-14 rounded-[28px] text-base font-medium transition-all duration-200 hover:scale-[1.02] opacity-0"
+            style={{
+              backgroundColor: "#2C3E50",
+              color: "white",
+              boxShadow: "0 4px 16px rgba(44, 62, 80, 0.2)",
+              animation: "fade-in-up 500ms ease-out forwards",
+              animationDelay: "600ms"
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "#1A2634";
+              e.currentTarget.style.boxShadow = "0 6px 20px rgba(44, 62, 80, 0.25)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "#2C3E50";
+              e.currentTarget.style.boxShadow = "0 4px 16px rgba(44, 62, 80, 0.2)";
+            }}
+          >
+            Let's Breathe
+          </button>
         </div>
       </main>
     );
