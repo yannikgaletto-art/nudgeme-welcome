@@ -197,3 +197,67 @@
 .animation-delay-800 {
   animation-delay: 800ms;
 }
+
+/* Page enter animation */
+@keyframes page-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-page-enter {
+  animation: page-enter 0.4s ease-out forwards;
+}
+
+/* Slide up with bounce for continue button */
+@keyframes slide-up-bounce {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  70% {
+    transform: translateY(-4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up-bounce {
+  animation: slide-up-bounce 0.4s ease-out forwards;
+}
+
+/* Mood button gradients */
+.bg-gradient-overwhelmed {
+  background: linear-gradient(135deg, #FFB88C 0%, #FFD4A3 100%);
+}
+
+.bg-gradient-anxious {
+  background: linear-gradient(135deg, #FFC9C9 0%, #FFE0E0 100%);
+}
+
+.bg-gradient-sad {
+  background: linear-gradient(135deg, #D4C5E8 0%, #E8DFF5 100%);
+}
+
+.bg-gradient-nervous {
+  background: linear-gradient(135deg, #FFF4C4 0%, #FFFADB 100%);
+}
+
+.bg-gradient-neutral {
+  background: linear-gradient(135deg, #D8D8D8 0%, #EBEBEB 100%);
+}
+
+.bg-gradient-calm {
+  background: linear-gradient(135deg, #B4D7E8 0%, #D0E8F2 100%);
+}
+
+.bg-gradient-energized {
+  background: linear-gradient(135deg, #A8C5B5 0%, #C5DFD1 100%);
+}
