@@ -71,6 +71,7 @@ export default {
         warm: {
           gray: "hsl(var(--warm-gray))",
         },
+        footer: "hsl(var(--footer))",
       },
       borderRadius: {
         lg: "var(--radius)",
