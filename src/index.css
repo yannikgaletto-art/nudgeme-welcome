@@ -262,38 +262,35 @@
   background: linear-gradient(135deg, #A8C5B5 0%, #C5DFD1 100%);
 }
 
-/* Breathing animations */
-@keyframes float-particle {
-  0%, 100% {
-    transform: translateY(0);
-    opacity: 0.1;
+/* Timer pulse animation for breathing countdown */
+@keyframes timer-pulse {
+  0% {
+    transform: scale(1);
   }
   50% {
-    transform: translateY(-30px);
-    opacity: 0.05;
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
   }
 }
 
-.animate-float-particle {
-  animation: float-particle 8s ease-in-out infinite;
+.animate-timer-pulse {
+  animation: timer-pulse 200ms ease-out;
 }
 
-/* Text pulse animation */
-@keyframes text-pulse {
+/* Scale in animation for breathing path */
+@keyframes scale-in {
   0% {
     opacity: 0;
-    transform: scale(1);
+    transform: scale(0.95);
   }
-  20% {
-    opacity: 1;
-    transform: scale(1.05);
-  }
-  40%, 100% {
+  100% {
     opacity: 1;
     transform: scale(1);
   }
 }
 
-.animate-text-pulse {
-  animation: text-pulse 0.5s ease-out forwards;
+.animate-scale-in {
+  animation: scale-in 400ms ease-out forwards;
 }
