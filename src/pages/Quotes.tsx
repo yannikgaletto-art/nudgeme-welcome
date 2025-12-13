@@ -372,7 +372,7 @@ const Quotes = () => {
           }}
         >
           <span
-            className="text-base font-semibold"
+            className="text-lg font-semibold"
             style={{ color: "#2C3E50", fontFamily: "Inter, sans-serif" }}
           >
             {moodEmojis[mood]} {moodLabels[mood]}
