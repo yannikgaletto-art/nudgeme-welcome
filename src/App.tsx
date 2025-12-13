@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import MoodSelection from "./pages/MoodSelection";
 import Breathing from "./pages/Breathing";
+import Quotes from "./pages/Quotes";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -20,6 +21,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/mood" element={<MoodSelection />} />
           <Route path="/breathing" element={<Breathing />} />
+          <Route path="/quotes" element={<Quotes />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
