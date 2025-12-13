@@ -8,17 +8,16 @@ interface Mood {
   id: string;
   emoji: string;
   label: string;
-  gradient: string;
 }
 
 const moods: Mood[] = [
-  { id: "overwhelmed", emoji: "😔", label: "Overwhelmed", gradient: "bg-gradient-overwhelmed" },
-  { id: "anxious", emoji: "😰", label: "Anxious", gradient: "bg-gradient-anxious" },
-  { id: "sad", emoji: "😢", label: "Sad", gradient: "bg-gradient-sad" },
-  { id: "nervous", emoji: "😬", label: "Nervous", gradient: "bg-gradient-nervous" },
-  { id: "neutral", emoji: "😐", label: "Neutral", gradient: "bg-gradient-neutral" },
-  { id: "calm", emoji: "😌", label: "Calm", gradient: "bg-gradient-calm" },
-  { id: "energized", emoji: "🚀", label: "Energized", gradient: "bg-gradient-energized" },
+  { id: "overwhelmed", emoji: "😔", label: "Overwhelmed" },
+  { id: "anxious", emoji: "😰", label: "Anxious" },
+  { id: "sad", emoji: "😢", label: "Sad" },
+  { id: "nervous", emoji: "😬", label: "Nervous" },
+  { id: "neutral", emoji: "😐", label: "Neutral" },
+  { id: "calm", emoji: "😌", label: "Calm" },
+  { id: "energized", emoji: "🚀", label: "Energized" },
 ];
 
 const MoodSelection = () => {
@@ -57,40 +56,51 @@ const MoodSelection = () => {
         </h1>
       </header>
 
-      {/* Mood Buttons Section */}
+      {/* Mood Cards Grid */}
       <section className="pt-[100px] pb-32 px-6 flex-1 overflow-y-auto scroll-smooth">
-        <div className="max-w-[380px] mx-auto flex flex-col gap-3">
-          {moods.map((mood, index) => (
-            <button
-              key={mood.id}
-              onClick={() => handleMoodSelect(mood.id)}
-              className={cn(
-                "w-full h-[68px] rounded-full flex items-center px-7 gap-5 transition-all duration-200 border-2 opacity-0 animate-fade-in",
-                mood.gradient,
-                selectedMood === mood.id
-                  ? "border-foreground shadow-mood-selected scale-[1.02]"
-                  : "border-transparent hover:scale-[1.03] hover:border-foreground/30 hover:shadow-mood-hover",
-                selectedMood && selectedMood !== mood.id && "opacity-70",
-                "active:scale-[0.97] active:brightness-95"
-              )}
-              style={{ animationDelay: `${index * 50}ms` }}
-              aria-label={`Select ${mood.label} mood`}
-              aria-selected={selectedMood === mood.id}
-            >
-              <span className="text-4xl" role="img" aria-hidden="true">
-                {mood.emoji}
-              </span>
-              <span className="text-lg font-medium text-foreground">
-                {mood.label}
-              </span>
-              {selectedMood === mood.id && (
-                <Check
-                  size={24}
-                  className="ml-auto text-foreground animate-fade-in"
-                />
-              )}
-            </button>
-          ))}
+        <div className="max-w-[400px] mx-auto grid grid-cols-2 gap-4 max-[360px]:grid-cols-1">
+          {moods.map((mood, index) => {
+            const isSelected = selectedMood === mood.id;
+            return (
+              <button
+                key={mood.id}
+                role="button"
+                onClick={() => handleMoodSelect(mood.id)}
+                className={cn(
+                  "relative aspect-square rounded-[20px] flex flex-col items-center justify-center p-6 transition-all duration-200 border-[3px] opacity-0 animate-fade-in",
+                  isSelected
+                    ? "bg-foreground border-foreground shadow-mood-selected"
+                    : "bg-background border-foreground hover:scale-105 hover:border-[4px] hover:shadow-mood-hover",
+                  "active:scale-95"
+                )}
+                style={{ animationDelay: `${index * 50}ms` }}
+                aria-label={`Select ${mood.label} mood`}
+                aria-selected={isSelected}
+              >
+                {/* Checkmark for selected state */}
+                {isSelected && (
+                  <div className="absolute top-3 right-3 animate-fade-in">
+                    <Check size={20} className="text-background" />
+                  </div>
+                )}
+                
+                {/* Emoji */}
+                <span className="text-5xl mb-4" role="img" aria-hidden="true">
+                  {mood.emoji}
+                </span>
+                
+                {/* Label */}
+                <span
+                  className={cn(
+                    "text-base font-medium transition-colors duration-200",
+                    isSelected ? "text-background" : "text-foreground"
+                  )}
+                >
+                  {mood.label}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </section>
 
