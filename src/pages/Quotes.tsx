@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Heart, Share2, ArrowLeft, Check, Loader2 } from "lucide-react";
+import { Heart, Share2, ArrowLeft, Check, Loader2, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 
@@ -409,20 +409,30 @@ const Quotes = () => {
         >
           <ArrowLeft size={24} />
         </button>
-        <button
-          onClick={() => navigate("/saved")}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-[20px] transition-all duration-200 hover:scale-105 active:scale-95"
-          style={{
-            backgroundColor: "rgba(255, 255, 255, 0.7)",
-            border: "1.5px solid rgba(44, 62, 80, 0.2)",
-          }}
-          aria-label={`View saved quotes (${savedQuotes.length})`}
-        >
-          <Heart size={16} style={{ color: savedQuotes.length > 0 ? "#E63946" : "#2C3E50" }} fill={savedQuotes.length > 0 ? "#E63946" : "none"} />
-          <span className="text-sm font-semibold" style={{ color: "#2C3E50", fontFamily: "Inter, sans-serif" }}>
-            {savedQuotes.length}
-          </span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => navigate("/saved")}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-[20px] transition-all duration-200 hover:scale-105 active:scale-95"
+            style={{
+              backgroundColor: "rgba(255, 255, 255, 0.7)",
+              border: "1.5px solid rgba(44, 62, 80, 0.2)",
+            }}
+            aria-label={`View saved quotes (${savedQuotes.length})`}
+          >
+            <Heart size={16} style={{ color: savedQuotes.length > 0 ? "#E63946" : "#2C3E50" }} fill={savedQuotes.length > 0 ? "#E63946" : "none"} />
+            <span className="text-sm font-semibold" style={{ color: "#2C3E50", fontFamily: "Inter, sans-serif" }}>
+              {savedQuotes.length}
+            </span>
+          </button>
+          <button
+            onClick={() => navigate("/settings")}
+            className="w-11 h-11 flex items-center justify-center rounded-full transition-all duration-200 hover:scale-105 active:scale-95"
+            style={{ color: "rgba(44, 62, 80, 0.6)" }}
+            aria-label="Settings"
+          >
+            <Settings size={24} />
+          </button>
+        </div>
       </div>
 
       {/* Tab Navigation */}
