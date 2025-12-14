@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -11,8 +11,8 @@ export interface BreathingTechnique {
   durationSeconds: number;
   benefits: string;
   attribution: string;
-  badge?: string;
-  recommended?: boolean;
+  badge: string;
+  badgeStyle: "gray" | "gold" | "navy";
   phases: {
     name: string;
     duration: number;
@@ -27,10 +27,10 @@ export const breathingTechniques: BreathingTechnique[] = [
     icon: "🫁",
     duration: "19 seconds",
     durationSeconds: 19,
-    benefits: "Natural calming for overthinking and nerves",
-    attribution: "by Dr. Andrew Weil (Stanford)",
-    badge: "Spiegel & Huberman Study | 2023",
-    recommended: true,
+    benefits: "Natural tranquilizer for the nervous system. Helps fall asleep faster.",
+    attribution: "by Dr. Andrew Weil",
+    badge: "Best for Sleep",
+    badgeStyle: "gray",
     phases: [
       { name: "inhale", duration: 4, label: "Inhale (4s)" },
       { name: "hold", duration: 7, label: "Hold (7s)" },
@@ -43,9 +43,10 @@ export const breathingTechniques: BreathingTechnique[] = [
     icon: "😮‍💨",
     duration: "10-15 seconds",
     durationSeconds: 12,
-    benefits: "Emergency brake for acute stress and anxiety",
-    attribution: "by Prof. Jack Feldman (UCLA) & Prof. Andrew Huberman (Stanford)",
-    badge: "Fastest relief",
+    benefits: "Emergency brake for acute stress. Fastest way to reduce physiological arousal.",
+    attribution: "by Prof. Huberman (Stanford) & Prof. Feldman (UCLA)",
+    badge: "Science-backed Winner",
+    badgeStyle: "gold",
     phases: [
       { name: "inhale", duration: 4, label: "Inhale (4s)" },
       { name: "double-inhale", duration: 1, label: "Quick Inhale (1s)" },
@@ -58,9 +59,10 @@ export const breathingTechniques: BreathingTechnique[] = [
     icon: "⬜",
     duration: "16 seconds",
     durationSeconds: 16,
-    benefits: "Sharpens focus and mental clarity under pressure",
-    attribution: "by US Navy SEALs (Mark Divine)",
-    badge: "Elite performance",
+    benefits: "Sharpens focus and mental clarity under pressure.",
+    attribution: "used by Navy SEALs (Mark Divine)",
+    badge: "Elite Performance",
+    badgeStyle: "navy",
     phases: [
       { name: "inhale", duration: 4, label: "Inhale (4s)" },
       { name: "hold", duration: 4, label: "Hold (4s)" },
@@ -70,11 +72,43 @@ export const breathingTechniques: BreathingTechnique[] = [
   },
 ];
 
+// Mood to recommended technique mapping
+const moodToTechnique: Record<string, string> = {
+  overwhelmed: "sigh",
+  anxious: "sigh",
+  sad: "478",
+  nervous: "478",
+  neutral: "box",
+  calm: "box",
+  energized: "box",
+};
+
+const getBadgeStyles = (style: "gray" | "gold" | "navy") => {
+  switch (style) {
+    case "gold":
+      return { backgroundColor: "#FFF4C4", color: "#2C3E50" };
+    case "navy":
+      return { backgroundColor: "#2C3E50", color: "#FFFFFF" };
+    default:
+      return { backgroundColor: "#E8E8E8", color: "#2C3E50" };
+  }
+};
+
 const BreathingSelection = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const mood = location.state?.mood || "calm";
   const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  // Determine recommended technique based on mood
+  const recommendedId = moodToTechnique[mood.toLowerCase()] || "478";
+
+  // Sort techniques: recommended first, then others
+  const sortedTechniques = useMemo(() => {
+    const recommended = breathingTechniques.find((t) => t.id === recommendedId);
+    const others = breathingTechniques.filter((t) => t.id !== recommendedId);
+    return recommended ? [recommended, ...others] : breathingTechniques;
+  }, [recommendedId]);
 
   const handleBack = () => {
     navigate("/mood");
@@ -86,15 +120,13 @@ const BreathingSelection = () => {
 
   const handleSelectTechnique = (technique: BreathingTechnique) => {
     setSelectedId(technique.id);
-    // Brief visual feedback then navigate
     setTimeout(() => {
-      // Save last selected technique
       localStorage.setItem("nudgeme_breathing_technique", technique.id);
+      localStorage.setItem("nudgeme_last_recommendation", recommendedId);
       navigate("/breathing", { state: { mood, technique } });
     }, 200);
   };
 
-  // Get last used technique for subtle indicator
   const lastUsedId = localStorage.getItem("nudgeme_breathing_technique");
 
   return (
@@ -160,98 +192,106 @@ const BreathingSelection = () => {
       {/* Technique Cards */}
       <section className="flex-1 px-6 py-6 overflow-y-auto">
         <div className="max-w-[900px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-4">
-          {breathingTechniques.map((technique, index) => (
-            <button
-              key={technique.id}
-              onClick={() => handleSelectTechnique(technique)}
-              className={cn(
-                "relative bg-white rounded-[20px] p-6 text-left transition-all duration-200 border-2 opacity-0",
-                selectedId === technique.id
-                  ? "border-[#2C3E50] scale-[0.98]"
-                  : "border-[rgba(44,62,80,0.2)] hover:border-[rgba(44,62,80,0.4)] hover:-translate-y-0.5"
-              )}
-              style={{
-                animation: "fade-in-up 500ms ease-out forwards",
-                animationDelay: `${200 + index * 100}ms`,
-              }}
-              aria-label={`Select ${technique.name}, ${technique.duration}`}
-            >
-              {/* Recommended badge */}
-              {technique.recommended && (
-                <span
-                  className="absolute top-4 right-4 text-[10px] font-semibold uppercase tracking-wide px-2 py-1 rounded-full"
-                  style={{
-                    backgroundColor: "rgba(76, 175, 80, 0.15)",
-                    color: "#4CAF50",
-                  }}
-                >
-                  Recommended
-                </span>
-              )}
+          {sortedTechniques.map((technique, index) => {
+            const isRecommended = technique.id === recommendedId;
+            const badgeStyles = getBadgeStyles(technique.badgeStyle);
 
-              {/* Last used indicator */}
-              {lastUsedId === technique.id && !technique.recommended && (
-                <span
-                  className="absolute top-4 right-4 flex items-center gap-1 text-[10px] font-medium"
-                  style={{ color: "#6B6B6B" }}
-                >
-                  <Check size={12} />
-                  Last used
-                </span>
-              )}
-
-              {/* Icon & Name */}
-              <div className="flex items-start gap-3 mb-3">
-                <span className="text-[40px]" role="img" aria-hidden="true">
-                  {technique.icon}
-                </span>
-                <div className="flex-1 pt-1">
-                  <h3
-                    className="text-lg font-bold"
-                    style={{ color: "#2C3E50" }}
+            return (
+              <button
+                key={technique.id}
+                onClick={() => handleSelectTechnique(technique)}
+                className={cn(
+                  "relative bg-white rounded-[20px] p-6 text-left transition-all duration-200 border-2 opacity-0",
+                  selectedId === technique.id
+                    ? "border-[#2C3E50] scale-[0.98]"
+                    : "border-[rgba(44,62,80,0.2)] hover:border-[rgba(44,62,80,0.4)] hover:-translate-y-0.5"
+                )}
+                style={{
+                  animation: "fade-in-up 500ms ease-out forwards",
+                  animationDelay: `${200 + index * 100}ms`,
+                }}
+                aria-label={`Select ${technique.name}, ${technique.duration}${isRecommended ? ", recommended for your mood" : ""}`}
+              >
+                {/* Recommended badge */}
+                {isRecommended && (
+                  <span
+                    className="absolute top-4 right-4 text-[10px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-lg"
+                    style={{
+                      backgroundColor: "#A8C5B5",
+                      color: "#FFFFFF",
+                    }}
                   >
-                    {technique.name}
-                  </h3>
-                  <p
-                    className="text-sm font-medium mt-0.5"
+                    RECOMMENDED
+                  </span>
+                )}
+
+                {/* Last used indicator */}
+                {lastUsedId === technique.id && !isRecommended && (
+                  <span
+                    className="absolute top-4 right-4 flex items-center gap-1 text-[10px] font-medium"
                     style={{ color: "#6B6B6B" }}
                   >
-                    {technique.duration}
-                  </p>
+                    <Check size={12} />
+                    Last used
+                  </span>
+                )}
+
+                {/* Icon & Name */}
+                <div className="flex items-start gap-3 mb-3">
+                  <span className="text-[40px]" role="img" aria-hidden="true">
+                    {technique.icon}
+                  </span>
+                  <div className="flex-1 pt-1">
+                    <h3
+                      className="text-lg font-bold"
+                      style={{ color: "#2C3E50" }}
+                    >
+                      {technique.name}
+                    </h3>
+                    <p
+                      className="text-sm font-medium mt-0.5"
+                      style={{ color: "#6B6B6B" }}
+                    >
+                      {technique.duration}
+                    </p>
+                  </div>
                 </div>
-              </div>
 
-              {/* Benefits */}
-              <p
-                className="text-sm leading-relaxed mb-3"
-                style={{ color: "rgba(107, 107, 107, 0.9)" }}
-              >
-                {technique.benefits}
-              </p>
+                {/* Benefits */}
+                <p
+                  className="text-sm leading-relaxed mb-3"
+                  style={{ color: "rgba(107, 107, 107, 0.9)" }}
+                >
+                  {technique.benefits}
+                </p>
 
-              {/* Attribution */}
-              <p
-                className="text-xs italic"
-                style={{ color: "rgba(107, 107, 107, 0.7)" }}
-              >
-                {technique.attribution}
-              </p>
+                {/* Attribution */}
+                <p
+                  className="text-xs italic mb-3"
+                  style={{ color: "rgba(107, 107, 107, 0.7)" }}
+                >
+                  {technique.attribution}
+                </p>
 
-              {/* Scientific badge */}
-              {technique.badge && (
+                {/* Technique badge */}
                 <span
-                  className="inline-block mt-3 text-[10px] font-medium px-2 py-1 rounded-lg"
-                  style={{
-                    backgroundColor: "rgba(44, 62, 80, 0.08)",
-                    color: "#6B6B6B",
-                  }}
+                  className="inline-block text-[10px] font-semibold px-2.5 py-1 rounded-lg"
+                  style={badgeStyles}
                 >
                   {technique.badge}
                 </span>
-              )}
-            </button>
-          ))}
+              </button>
+            );
+          })}
         </div>
+
+        {/* Scientific credibility footer */}
+        <p
+          className="text-center mt-8 text-xs"
+          style={{ color: "rgba(107, 107, 107, 0.5)" }}
+        >
+          All techniques backed by peer-reviewed research and clinical practice.
+        </p>
       </section>
     </main>
   );
