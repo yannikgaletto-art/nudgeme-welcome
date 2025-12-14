@@ -55,36 +55,83 @@ const SavedQuotes = () => {
     
     setSharingId(quote.id);
     
-    const formattedText = `"${quote.text}"\n\n— ${quote.author}\n\nShared from NudgeMe`;
+    // Truncate long quotes for compatibility (280 char limit)
+    const truncatedText = quote.text.length > 200 
+      ? quote.text.slice(0, 197) + "..." 
+      : quote.text;
+    const formattedText = `"${truncatedText}"\n\n— ${quote.author}\n\nShared from NudgeMe`;
     
-    const canShare = typeof navigator.share === "function";
     const canCopy = typeof navigator.clipboard?.writeText === "function";
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    const canShare = typeof navigator.share === "function" && isMobile;
+    
+    let success = false;
     
     try {
-      if (canShare) {
-        await navigator.share({
-          title: "NudgeMe Quote",
-          text: formattedText,
-        });
-        console.log("Share:", { quote: quote.text, author: quote.author, method: "native", source: "saved" });
-      } else if (canCopy) {
+      // Method 1: Try clipboard first (most compatible)
+      if (canCopy) {
         await navigator.clipboard.writeText(formattedText);
-        console.log("Share:", { quote: quote.text, author: quote.author, method: "clipboard", source: "saved" });
+        console.log("Share:", { quote: truncatedText, author: quote.author, method: "clipboard", source: "saved" });
         toast({
           title: "Quote copied to clipboard!",
           duration: 2000,
         });
+        success = true;
       }
-      setShareSuccessId(quote.id);
-      setTimeout(() => setShareSuccessId(null), 500);
+      // Method 2: Try Web Share API on mobile only
+      else if (canShare) {
+        await navigator.share({
+          title: "NudgeMe Quote",
+          text: formattedText,
+        });
+        console.log("Share:", { quote: truncatedText, author: quote.author, method: "native", source: "saved" });
+        success = true;
+      }
+      // Method 3: Fallback - show manual copy toast
+      else {
+        toast({
+          title: "Copy manually:",
+          description: formattedText.slice(0, 100) + "...",
+          duration: 5000,
+        });
+      }
+      
+      if (success) {
+        setShareSuccessId(quote.id);
+        setTimeout(() => setShareSuccessId(null), 500);
+      }
     } catch (err: unknown) {
       const error = err as Error;
-      if (error.name !== "AbortError") {
+      // Silent on user cancel
+      if (error.name === "AbortError") {
+        // User canceled share - do nothing
+      } else if (error.name === "NotAllowedError") {
         toast({
-          title: "Sharing failed. Try again.",
+          title: "Please allow clipboard access",
           variant: "destructive",
           duration: 2000,
         });
+      } else {
+        // Try Web Share as fallback if clipboard failed
+        if (canShare) {
+          try {
+            await navigator.share({ title: "NudgeMe Quote", text: formattedText });
+            setShareSuccessId(quote.id);
+            setTimeout(() => setShareSuccessId(null), 500);
+          } catch {
+            toast({
+              title: "Sharing failed. Try again.",
+              variant: "destructive",
+              duration: 2000,
+            });
+          }
+        } else {
+          toast({
+            title: "Sharing failed. Try again.",
+            variant: "destructive",
+            duration: 2000,
+          });
+        }
       }
     } finally {
       setSharingId(null);
