@@ -216,41 +216,29 @@ we balance you
       <section className="flex-1 px-6 pt-2 pb-6 overflow-y-auto">
         <div className="max-w-[1080px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
           {sortedTechniques.map((technique, index) => {
-            const isRecommended = technique.id === recommendedId;
-            return (
-              <button
-                key={technique.id}
-                onClick={() => handleSelectTechnique(technique)}
-                className={cn(
-                  "relative bg-white rounded-[20px] text-left transition-all duration-200 opacity-0 w-full flex flex-col",
-                  selectedId === technique.id ? "scale-[0.98]" : "hover:-translate-y-1 hover:shadow-lg"
-                )}
-                style={{
-                  height: "560px",
-                  padding: "32px 24px",
-                  border: "2px solid rgba(44, 62, 80, 0.15)",
-                  boxShadow: "0 4px 16px rgba(44, 62, 80, 0.08)",
-                  animation: "fade-in-up 500ms ease-out forwards",
-                  animationDelay: `${200 + index * 50}ms`
-                }}
-                aria-label={`Select ${technique.name}, ${technique.duration}${isRecommended ? ", recommended for you" : ""}`}
-              >
+          const isRecommended = technique.id === recommendedId;
+          return <button key={technique.id} onClick={() => handleSelectTechnique(technique)} className={cn("relative bg-white rounded-[20px] text-left transition-all duration-200 opacity-0 w-full flex flex-col", selectedId === technique.id ? "scale-[0.98]" : "hover:-translate-y-1 hover:shadow-lg")} style={{
+            height: "560px",
+            padding: "32px 24px",
+            border: "2px solid rgba(44, 62, 80, 0.15)",
+            boxShadow: "0 4px 16px rgba(44, 62, 80, 0.08)",
+            animation: "fade-in-up 500ms ease-out forwards",
+            animationDelay: `${200 + index * 50}ms`
+          }} aria-label={`Select ${technique.name}, ${technique.duration}${isRecommended ? ", recommended for you" : ""}`}>
                 {/* Section 1 - Top Badge Area (28px) */}
                 <div className="h-[28px] flex-shrink-0 relative">
-                  {isRecommended && (
-                    <span
-                      className="absolute top-0 right-0 text-[11px] font-bold uppercase tracking-wide px-3 py-1.5 rounded-full"
-                      style={{ backgroundColor: "#A8C5B5", color: "#FFFFFF" }}
-                    >
+                  {isRecommended && <span className="absolute top-0 right-0 text-[11px] font-bold uppercase tracking-wide px-3 py-1.5 rounded-full" style={{
+                backgroundColor: "#A8C5B5",
+                color: "#FFFFFF"
+              }}>
                       FOR YOU
-                    </span>
-                  )}
-                  {lastUsedId === technique.id && !isRecommended && (
-                    <span className="absolute top-0 right-0 flex items-center gap-1 text-[11px] font-medium" style={{ color: "#6B6B6B" }}>
+                    </span>}
+                  {lastUsedId === technique.id && !isRecommended && <span className="absolute top-0 right-0 flex items-center gap-1 text-[11px] font-medium" style={{
+                color: "#6B6B6B"
+              }}>
                       <Check size={12} />
                       Last used
-                    </span>
-                  )}
+                    </span>}
                 </div>
 
                 {/* Section 2 - Icon (64px) */}
@@ -260,70 +248,75 @@ we balance you
 
                 {/* Section 3 - Headline (64px) */}
                 <div className="h-[64px] flex-shrink-0 flex items-center justify-center">
-                  <h3
-                    className="text-2xl font-semibold text-center leading-tight line-clamp-2"
-                    style={{ fontFamily: "'Playfair Display', serif", color: "#2C3E50" }}
-                  >
+                  <h3 className="text-2xl font-semibold text-center leading-tight line-clamp-2" style={{
+                fontFamily: "'Playfair Display', serif",
+                color: "#2C3E50"
+              }}>
                     {technique.headline}
                   </h3>
                 </div>
 
                 {/* Section 4 - Sub-headline (40px) */}
                 <div className="h-[40px] flex-shrink-0 flex items-center justify-center">
-                  <p className="text-[15px] font-medium text-center line-clamp-2" style={{ color: "#6B6B6B" }}>
+                  <p className="text-[15px] font-medium text-center line-clamp-2" style={{
+                color: "#6B6B6B"
+              }}>
                     {technique.subheadline}
                   </p>
                 </div>
 
                 {/* Section 5 - Effect Label (32px) */}
                 <div className="h-[32px] flex-shrink-0 flex items-center justify-center">
-                  <p className="text-[13px] text-center" style={{ color: "rgba(107, 107, 107, 0.8)" }}>
-                    {technique.effectLabel}
-                  </p>
+                  
                 </div>
 
                 {/* Section 6 - Divider (24px) */}
                 <div className="h-[24px] flex-shrink-0 flex items-center justify-center">
-                  <div className="w-4/5 h-px" style={{ backgroundColor: "rgba(44, 62, 80, 0.15)" }} />
+                  <div className="w-4/5 h-px" style={{
+                backgroundColor: "rgba(44, 62, 80, 0.15)"
+              }} />
                 </div>
 
                 {/* Section 7 - Bullet Points (140px) */}
                 <div className="h-[140px] flex-shrink-0 flex flex-col justify-center gap-3">
-                  {technique.bulletPoints.map((point, i) => (
-                    <div
-                      key={i}
-                      className="flex items-start gap-2.5 text-sm pl-6"
-                      style={{ color: "rgba(107, 107, 107, 0.85)", lineHeight: "1.8" }}
-                    >
-                      <Check size={14} className="flex-shrink-0 mt-1" style={{ color: "#6B6B6B" }} />
+                  {technique.bulletPoints.map((point, i) => <div key={i} className="flex items-start gap-2.5 text-sm pl-6" style={{
+                color: "rgba(107, 107, 107, 0.85)",
+                lineHeight: "1.8"
+              }}>
+                      <Check size={14} className="flex-shrink-0 mt-1" style={{
+                  color: "#6B6B6B"
+                }} />
                       <span className="line-clamp-2">{point}</span>
-                    </div>
-                  ))}
+                    </div>)}
                 </div>
 
                 {/* Section 8 - Attribution (60px) */}
                 <div className="h-[60px] flex-shrink-0 flex items-start pt-2">
-                  <p className="text-[13px] font-medium pl-6 line-clamp-2" style={{ color: "#6B6B6B", lineHeight: "1.6" }}>
+                  <p className="text-[13px] font-medium pl-6 line-clamp-2" style={{
+                color: "#6B6B6B",
+                lineHeight: "1.6"
+              }}>
                     {technique.attribution}
                   </p>
                 </div>
 
                 {/* Section 9 - Bottom Badge (44px) */}
                 <div className="h-[44px] flex-shrink-0 flex items-center justify-center">
-                  <span
-                    className="text-[11px] font-semibold px-4 py-2 rounded-lg"
-                    style={{ backgroundColor: "#2C3E50", color: "#FFFFFF" }}
-                  >
+                  <span className="text-[11px] font-semibold px-4 py-2 rounded-lg" style={{
+                backgroundColor: "#2C3E50",
+                color: "#FFFFFF"
+              }}>
                     {technique.badge}
                   </span>
                 </div>
-              </button>
-            );
-          })}
+              </button>;
+        })}
         </div>
 
         {/* Scientific credibility footer */}
-        <p className="text-center mt-8 text-xs" style={{ color: "rgba(107, 107, 107, 0.5)" }}>
+        <p className="text-center mt-8 text-xs" style={{
+        color: "rgba(107, 107, 107, 0.5)"
+      }}>
           All techniques backed by peer-reviewed research and clinical practice.
         </p>
       </section>
