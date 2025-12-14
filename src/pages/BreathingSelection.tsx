@@ -78,7 +78,7 @@ export const breathingTechniques: BreathingTechnique[] = [{
   id: "sigh",
   name: "Physiological Sigh",
   headline: "Stress Drop",
-  subheadline: "Physiological Sigh · 10-15 sec",
+  subheadline: "Physio. Sigh · 10-15 sec",
   icon: "zap",
   duration: "10-15 seconds",
   durationSeconds: 12,
