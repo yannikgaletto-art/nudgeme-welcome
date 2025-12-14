@@ -213,8 +213,8 @@ we balance you
       </section>
 
       {/* Technique Cards */}
-      <section className="flex-1 px-6 py-6 overflow-y-auto">
-        <div className="max-w-[1040px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-5">
+      <section className="flex-1 px-6 pt-2 pb-6 overflow-y-auto">
+        <div className="max-w-[1080px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
           {sortedTechniques.map((technique, index) => {
             const isRecommended = technique.id === recommendedId;
             return (
@@ -222,11 +222,12 @@ we balance you
                 key={technique.id}
                 onClick={() => handleSelectTechnique(technique)}
                 className={cn(
-                  "relative bg-white rounded-[20px] p-6 text-left transition-all duration-200 opacity-0 w-full flex flex-col",
+                  "relative bg-white rounded-[20px] text-left transition-all duration-200 opacity-0 w-full flex flex-col",
                   selectedId === technique.id ? "scale-[0.98]" : "hover:-translate-y-1 hover:shadow-lg"
                 )}
                 style={{
-                  height: "520px",
+                  height: "560px",
+                  padding: "32px 24px",
                   border: "2px solid rgba(44, 62, 80, 0.15)",
                   boxShadow: "0 4px 16px rgba(44, 62, 80, 0.08)",
                   animation: "fade-in-up 500ms ease-out forwards",
@@ -252,8 +253,8 @@ we balance you
                   )}
                 </div>
 
-                {/* Section 2 - Icon (72px) */}
-                <div className="h-[72px] flex-shrink-0 flex items-center justify-center">
+                {/* Section 2 - Icon (64px) */}
+                <div className="h-[64px] flex-shrink-0 flex items-center justify-center">
                   <TechniqueIcon icon={technique.icon} />
                 </div>
 
@@ -286,25 +287,23 @@ we balance you
                   <div className="w-4/5 h-px" style={{ backgroundColor: "rgba(44, 62, 80, 0.15)" }} />
                 </div>
 
-                {/* Section 7 - Bullet Points (120px) */}
-                <div className="h-[120px] flex-shrink-0 flex flex-col justify-center">
-                  <ul className="space-y-2 pl-6">
-                    {technique.bulletPoints.map((point, i) => (
-                      <li
-                        key={i}
-                        className="flex items-start gap-2.5 text-sm leading-relaxed"
-                        style={{ color: "rgba(107, 107, 107, 0.85)", height: "32px" }}
-                      >
-                        <Check size={14} className="flex-shrink-0 mt-0.5" style={{ color: "#6B6B6B" }} />
-                        <span className="line-clamp-2">{point}</span>
-                      </li>
-                    ))}
-                  </ul>
+                {/* Section 7 - Bullet Points (140px) */}
+                <div className="h-[140px] flex-shrink-0 flex flex-col justify-center gap-3">
+                  {technique.bulletPoints.map((point, i) => (
+                    <div
+                      key={i}
+                      className="flex items-start gap-2.5 text-sm pl-6"
+                      style={{ color: "rgba(107, 107, 107, 0.85)", lineHeight: "1.8" }}
+                    >
+                      <Check size={14} className="flex-shrink-0 mt-1" style={{ color: "#6B6B6B" }} />
+                      <span className="line-clamp-2">{point}</span>
+                    </div>
+                  ))}
                 </div>
 
-                {/* Section 8 - Attribution (48px) */}
-                <div className="h-[48px] flex-shrink-0 flex items-center">
-                  <p className="text-[13px] font-medium pl-6 line-clamp-2" style={{ color: "#6B6B6B" }}>
+                {/* Section 8 - Attribution (60px) */}
+                <div className="h-[60px] flex-shrink-0 flex items-start pt-2">
+                  <p className="text-[13px] font-medium pl-6 line-clamp-2" style={{ color: "#6B6B6B", lineHeight: "1.6" }}>
                     {technique.attribution}
                   </p>
                 </div>
