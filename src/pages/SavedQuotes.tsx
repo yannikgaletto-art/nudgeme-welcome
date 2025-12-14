@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Heart, Share2, Trash2, Check, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
+import SkeletonCard from "@/components/SkeletonCard";
 
 interface SavedQuote {
   id: string;
@@ -17,6 +18,7 @@ const STORAGE_KEY = "nudgeme_saved_quotes";
 const SavedQuotes = () => {
   const navigate = useNavigate();
   const [savedQuotes, setSavedQuotes] = useState<SavedQuote[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isLoaded, setIsLoaded] = useState(false);
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [confirmRemove, setConfirmRemove] = useState<string | null>(null);
@@ -24,12 +26,25 @@ const SavedQuotes = () => {
   const [shareSuccessId, setShareSuccessId] = useState<string | null>(null);
 
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      const parsed = JSON.parse(saved) as SavedQuote[];
-      setSavedQuotes(parsed.sort((a, b) => b.savedAt - a.savedAt));
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved) as SavedQuote[];
+        setSavedQuotes(parsed.sort((a, b) => b.savedAt - a.savedAt));
+      }
+    } catch (error) {
+      console.error("Error loading saved quotes:", error);
+      toast({
+        title: "Could not load saved quotes",
+        variant: "destructive",
+        duration: 2000,
+      });
     }
-    setTimeout(() => setIsLoaded(true), 100);
+    // Simulate minimum loading time for skeleton visibility
+    setTimeout(() => {
+      setIsLoading(false);
+      setTimeout(() => setIsLoaded(true), 100);
+    }, 300);
   }, []);
 
   const handleRemove = (id: string) => {
@@ -173,7 +188,14 @@ const SavedQuotes = () => {
 
       {/* Content */}
       <div className="flex-1 px-6 pb-8 overflow-y-auto">
-        {savedQuotes.length === 0 ? (
+        {isLoading ? (
+          /* Loading Skeleton */
+          <div className="flex flex-col gap-4 mt-4">
+            {[0, 1, 2].map((i) => (
+              <SkeletonCard key={i} variant="saved" />
+            ))}
+          </div>
+        ) : savedQuotes.length === 0 ? (
           /* Empty State */
           <div
             className={cn(
@@ -188,6 +210,17 @@ const SavedQuotes = () => {
             <p className="mt-2 text-sm" style={{ color: "#6B6B6B", fontFamily: "Inter, sans-serif" }}>
               Tap ❤️ on any quote to save it
             </p>
+            <button
+              onClick={() => navigate("/quotes")}
+              className="mt-6 px-6 py-3 rounded-full font-medium text-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
+              style={{
+                border: "2px solid #2C3E50",
+                color: "#2C3E50",
+                fontFamily: "Inter, sans-serif",
+              }}
+            >
+              Discover Quotes
+            </button>
           </div>
         ) : (
           /* Quote List */
