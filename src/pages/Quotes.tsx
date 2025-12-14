@@ -484,10 +484,11 @@ const Quotes = () => {
       )}>
         {activeTab === "forYou" && currentQuote && (
           <>
-            {/* Mood Label Bar */}
-            <div
+            {/* Mood Label Bar - Clickable to return to mood selection */}
+            <button
+              onClick={() => navigate("/mood-selection")}
               className={cn(
-                "w-full max-w-[380px] h-[54px] rounded-3xl flex items-center justify-center mb-4 transition-all duration-300",
+                "w-full max-w-[380px] h-[54px] rounded-3xl flex items-center justify-center mb-4 transition-all duration-200 cursor-pointer hover:scale-[1.02] active:scale-[0.97]",
                 isLoaded ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"
               )}
               style={{
@@ -496,11 +497,12 @@ const Quotes = () => {
                 padding: "0 24px",
                 transitionDelay: "150ms",
               }}
+              aria-label={`Current mood: ${moodLabels[mood]}. Tap to change mood.`}
             >
               <span className="text-xl font-semibold" style={{ color: "#2C3E50", fontFamily: "Inter, sans-serif" }}>
                 {moodEmojis[mood]} {moodLabels[mood]}
               </span>
-            </div>
+            </button>
 
             {/* Quote Card */}
             <div
