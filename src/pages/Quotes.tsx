@@ -67,16 +67,7 @@ const categoryLabels: Record<CategoryType, string> = {
   business: "Business",
 };
 
-const categoryGradients: Record<CategoryType, string> = {
-  spirituality: "linear-gradient(135deg, #E8DFF5 0%, #D4C5E8 100%)",
-  politics: "linear-gradient(135deg, #FFE0E0 0%, #FFC9C9 100%)",
-  philosophy: "linear-gradient(135deg, #D0E8F2 0%, #B4D7E8 100%)",
-  sociology: "linear-gradient(135deg, #C5DFD1 0%, #A8C5B5 100%)",
-  sports: "linear-gradient(135deg, #FFFADB 0%, #FFF4C4 100%)",
-  literature: "linear-gradient(135deg, #FFE4C4 0%, #FFDAB9 100%)",
-  science: "linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%)",
-  business: "linear-gradient(135deg, #F5F0FA 0%, #E8DFF5 100%)",
-};
+// Removed categoryGradients - now using white cards with navy borders
 
 const quotes: Quote[] = [
   // OVERWHELMED quotes
@@ -446,23 +437,30 @@ const Quotes = () => {
                   key={category}
                   onClick={() => handleCategorySelect(category)}
                   className={cn(
-                    "aspect-square rounded-[20px] flex flex-col items-center justify-center p-6 cursor-pointer transition-all duration-200 hover:scale-[1.03] active:scale-[0.98]",
+                    "aspect-square rounded-[20px] flex flex-col items-center justify-center cursor-pointer transition-all duration-200 hover:scale-[1.03] active:scale-[0.97]",
                     isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
                   )}
                   style={{
-                    background: categoryGradients[category],
-                    border: "2px solid transparent",
+                    backgroundColor: "white",
+                    border: "2px solid rgba(44, 62, 80, 0.2)",
                     boxShadow: "0 4px 16px rgba(44, 62, 80, 0.1)",
+                    padding: "28px",
                     transitionDelay: `${50 * index}ms`,
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.borderColor = "#2C3E50"}
-                  onMouseLeave={(e) => e.currentTarget.style.borderColor = "transparent"}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = "rgba(44, 62, 80, 0.4)";
+                    e.currentTarget.style.boxShadow = "0 6px 24px rgba(44, 62, 80, 0.15)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = "rgba(44, 62, 80, 0.2)";
+                    e.currentTarget.style.boxShadow = "0 4px 16px rgba(44, 62, 80, 0.1)";
+                  }}
                 >
-                  <span className="text-[40px] mb-2">{categoryEmojis[category]}</span>
-                  <span className="font-semibold text-base" style={{ color: "#2C3E50", fontFamily: "Inter, sans-serif" }}>
+                  <span className="text-[44px]">{categoryEmojis[category]}</span>
+                  <span className="font-semibold text-base mt-4" style={{ color: "#2C3E50", fontFamily: "Inter, sans-serif" }}>
                     {categoryLabels[category]}
                   </span>
-                  <span className="text-xs mt-1" style={{ color: "rgba(44, 62, 80, 0.6)", fontFamily: "Inter, sans-serif" }}>
+                  <span className="text-xs mt-1" style={{ color: "#6B6B6B", fontFamily: "Inter, sans-serif" }}>
                     ({count} quotes)
                   </span>
                 </button>
