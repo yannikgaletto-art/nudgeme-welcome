@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Heart, Share2, ArrowLeft, X } from "lucide-react";
+import { Heart, Share2, ArrowLeft, Check, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 
@@ -178,6 +178,8 @@ const Quotes = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isCardAnimating, setIsCardAnimating] = useState(false);
   const [isSaveAnimating, setIsSaveAnimating] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
+  const [shareSuccess, setShareSuccess] = useState(false);
   const [isTabSwitching, setIsTabSwitching] = useState(false);
 
   useEffect(() => {
@@ -286,20 +288,43 @@ const Quotes = () => {
 
   const handleShare = async () => {
     const quote = activeTab === "forYou" ? currentQuote : currentCategoryQuote;
-    if (!quote) return;
+    if (!quote || isSharing) return;
     
-    const shareText = `"${quote.text}" — ${quote.author}`;
+    setIsSharing(true);
     
-    if (navigator.share) {
-      try {
-        await navigator.share({ text: shareText });
-      } catch (err) {}
-    } else {
-      await navigator.clipboard.writeText(shareText);
-      toast({
-        title: "Quote copied!",
-        description: "The quote has been copied to your clipboard.",
-      });
+    const formattedText = `"${quote.text}"\n\n— ${quote.author}\n\nShared from NudgeMe`;
+    
+    const canShare = typeof navigator.share === "function";
+    const canCopy = typeof navigator.clipboard?.writeText === "function";
+    
+    try {
+      if (canShare) {
+        await navigator.share({
+          title: "NudgeMe Quote",
+          text: formattedText,
+        });
+        console.log("Share:", { quote: quote.text, author: quote.author, method: "native", source: activeTab });
+      } else if (canCopy) {
+        await navigator.clipboard.writeText(formattedText);
+        console.log("Share:", { quote: quote.text, author: quote.author, method: "clipboard", source: activeTab });
+        toast({
+          title: "Quote copied to clipboard!",
+          duration: 2000,
+        });
+      }
+      setShareSuccess(true);
+      setTimeout(() => setShareSuccess(false), 500);
+    } catch (err: unknown) {
+      const error = err as Error;
+      if (error.name !== "AbortError") {
+        toast({
+          title: "Sharing failed. Try again.",
+          variant: "destructive",
+          duration: 2000,
+        });
+      }
+    } finally {
+      setIsSharing(false);
     }
   };
 
@@ -454,11 +479,26 @@ const Quotes = () => {
                 </button>
                 <button
                   onClick={handleShare}
-                  className="w-12 h-12 flex items-center justify-center rounded-3xl transition-all duration-200 hover:scale-105 active:scale-95"
-                  style={{ backgroundColor: "white", border: "1.5px solid rgba(44, 62, 80, 0.2)" }}
-                  aria-label="Share quote"
+                  disabled={isSharing}
+                  className={cn(
+                    "w-12 h-12 flex items-center justify-center rounded-3xl transition-all duration-200",
+                    !isSharing && "hover:scale-105 active:scale-95",
+                    isSharing && "opacity-60 cursor-not-allowed"
+                  )}
+                  style={{ 
+                    backgroundColor: "white", 
+                    border: "1.5px solid rgba(44, 62, 80, 0.2)",
+                    transform: shareSuccess ? "scale(1.2)" : undefined,
+                  }}
+                  aria-label="Share this quote"
                 >
-                  <Share2 size={22} style={{ color: "#2C3E50" }} />
+                  {isSharing ? (
+                    <Loader2 size={22} style={{ color: "#2C3E50" }} className="animate-spin" />
+                  ) : shareSuccess ? (
+                    <Check size={22} style={{ color: "#22c55e" }} />
+                  ) : (
+                    <Share2 size={22} style={{ color: "#2C3E50" }} />
+                  )}
                 </button>
               </div>
             </div>
@@ -557,11 +597,26 @@ const Quotes = () => {
                 </button>
                 <button
                   onClick={handleShare}
-                  className="w-12 h-12 flex items-center justify-center rounded-3xl transition-all duration-200 hover:scale-105 active:scale-95"
-                  style={{ backgroundColor: "white", border: "1.5px solid rgba(44, 62, 80, 0.2)" }}
-                  aria-label="Share quote"
+                  disabled={isSharing}
+                  className={cn(
+                    "w-12 h-12 flex items-center justify-center rounded-3xl transition-all duration-200",
+                    !isSharing && "hover:scale-105 active:scale-95",
+                    isSharing && "opacity-60 cursor-not-allowed"
+                  )}
+                  style={{ 
+                    backgroundColor: "white", 
+                    border: "1.5px solid rgba(44, 62, 80, 0.2)",
+                    transform: shareSuccess ? "scale(1.2)" : undefined,
+                  }}
+                  aria-label="Share this quote"
                 >
-                  <Share2 size={22} style={{ color: "#2C3E50" }} />
+                  {isSharing ? (
+                    <Loader2 size={22} style={{ color: "#2C3E50" }} className="animate-spin" />
+                  ) : shareSuccess ? (
+                    <Check size={22} style={{ color: "#22c55e" }} />
+                  ) : (
+                    <Share2 size={22} style={{ color: "#2C3E50" }} />
+                  )}
                 </button>
               </div>
             </div>
