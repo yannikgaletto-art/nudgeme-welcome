@@ -181,7 +181,7 @@ const SavedQuotes = () => {
               isLoaded ? "opacity-100 scale-100" : "opacity-0 scale-95"
             )}
           >
-            <Heart size={64} style={{ color: "rgba(44, 62, 80, 0.3)" }} strokeWidth={1.5} />
+            <Heart size={64} className="animate-gentle-pulse" style={{ color: "rgba(44, 62, 80, 0.3)" }} strokeWidth={1.5} />
             <p className="mt-6 text-lg font-medium" style={{ color: "#2C3E50", fontFamily: "Inter, sans-serif" }}>
               No saved quotes yet
             </p>

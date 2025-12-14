@@ -68,8 +68,8 @@ const MoodSelection = () => {
         <div className="max-w-[400px] mx-auto grid grid-cols-2 gap-4 max-[360px]:grid-cols-1">
           {moods.map((mood, index) => {
           const isSelected = selectedMood === mood.id;
-          return <button key={mood.id} role="button" onClick={() => handleMoodSelect(mood.id)} className={cn("relative aspect-square rounded-[20px] flex flex-col items-center justify-center p-6 transition-all duration-200 border-[3px] opacity-0 animate-fade-in", isSelected ? "bg-foreground border-foreground shadow-mood-selected" : "bg-background border-foreground hover:scale-105 hover:border-[4px] hover:shadow-mood-hover", "active:scale-95")} style={{
-            animationDelay: `${index * 50}ms`
+          return <button key={mood.id} role="button" onClick={() => handleMoodSelect(mood.id)} className={cn("relative aspect-square rounded-[20px] flex flex-col items-center justify-center p-6 transition-all duration-200 border-[3px] opacity-0 animate-fade-in hover-lift", isSelected ? "bg-foreground border-foreground shadow-mood-selected" : "bg-background border-foreground", "active:scale-95")} style={{
+            animationDelay: `${index * 80}ms`
           }} aria-label={`Select ${mood.label} mood`} aria-selected={isSelected}>
                 {/* Checkmark for selected state */}
                 {isSelected && <div className="absolute top-3 right-3 animate-fade-in">

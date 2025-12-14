@@ -43,6 +43,13 @@
     --warm-gray: 0 0% 60%; /* #999 */
     --footer: 0 0% 63%; /* #A0A0A0 */
 
+    /* Animation timing */
+    --transition-fast: 150ms ease;
+    --transition-medium: 300ms ease-out;
+    --transition-slow: 400ms ease-out;
+    --spring: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --ease-out: cubic-bezier(0.4, 0, 0.2, 1);
+
     /* Shadows */
     --shadow-button: 0 4px 12px hsla(210, 28%, 24%, 0.15);
     --shadow-button-hover: 0 6px 16px hsla(210, 28%, 24%, 0.2);
@@ -312,4 +319,190 @@
 
 .animate-text-pulse {
   animation: text-pulse 300ms ease-out;
+}
+
+/* Heart burst animation for save */
+@keyframes heart-burst {
+  0% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.4);
+  }
+  50% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-heart-burst {
+  animation: heart-burst 400ms ease-out;
+}
+
+/* Lift hover effect for cards */
+.hover-lift {
+  transition: transform 200ms ease-out, box-shadow 200ms ease-out;
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(44, 62, 80, 0.15);
+}
+
+/* Button press feedback */
+.btn-press {
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.btn-press:hover {
+  transform: scale(1.02);
+}
+
+.btn-press:active {
+  transform: scale(0.98);
+}
+
+/* Gentle pulse for empty state icons */
+@keyframes gentle-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.5;
+  }
+}
+
+.animate-gentle-pulse {
+  animation: gentle-pulse 2s ease-in-out infinite;
+}
+
+/* Slide in from right for page transitions */
+@keyframes slide-in-right {
+  0% {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 300ms ease-out forwards;
+}
+
+/* Slide out to right */
+@keyframes slide-out-right {
+  0% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+}
+
+.animate-slide-out-right {
+  animation: slide-out-right 300ms ease-in forwards;
+}
+
+/* Shake animation for errors */
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-8px);
+  }
+  75% {
+    transform: translateX(8px);
+  }
+}
+
+.animate-shake {
+  animation: shake 400ms ease-out;
+}
+
+/* Ripple effect */
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+.animate-ripple {
+  animation: ripple 400ms ease-out forwards;
+}
+
+/* Shimmer for loading skeletons */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(44, 62, 80, 0.05) 0%,
+    rgba(44, 62, 80, 0.1) 50%,
+    rgba(44, 62, 80, 0.05) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* Bounce in for cards */
+@keyframes bounce-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-bounce-in {
+  animation: bounce-in 400ms cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .animate-nudge-circle,
+  .animate-gentle-pulse {
+    animation: none !important;
+  }
 }
