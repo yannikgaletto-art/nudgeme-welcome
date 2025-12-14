@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, ChevronRight, Lock, Settings2, Share2, Star, Mail, FileText, Trash2, Download, Upload, HelpCircle, Heart, FolderOpen, BookOpen } from "lucide-react";
+import { ArrowLeft, ChevronRight, Lock, Settings2, Share2, Star, Mail, FileText, Trash2, Download, Upload, HelpCircle, Heart, FolderOpen, BookOpen, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
+import PremiumBadge from "@/components/PremiumBadge";
+import { getFreeSaveLimit } from "@/lib/premium";
 
 interface AppSettings {
   dailyReminders: boolean;
@@ -159,17 +161,8 @@ const Settings = () => {
     </h3>
   );
 
-  const PremiumBadge = () => (
-    <div
-      className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold"
-      style={{
-        background: "linear-gradient(135deg, #FFD700 0%, #FFA500 100%)",
-        color: "#5C4700",
-      }}
-    >
-      <Lock size={10} />
-      Premium
-    </div>
+  const PremiumBadgeLocal = () => (
+    <PremiumBadge size="sm" showIcon={true} />
   );
 
   return (
@@ -254,9 +247,10 @@ const Settings = () => {
             label="Dark Mode"
             sublabel="Coming soon"
             delay={250}
+            onClick={() => toast({ title: "Dark mode available in Premium", duration: 2000 })}
             rightContent={
               <div className="flex items-center gap-2">
-                <PremiumBadge />
+                <PremiumBadgeLocal />
                 <ToggleSwitch enabled={settings.darkMode} onToggle={() => {}} disabled />
               </div>
             }
@@ -274,8 +268,8 @@ const Settings = () => {
           />
           <SettingsItem
             icon={<Heart size={20} style={{ color: "#E63946" }} />}
-            label={`${savedCount} quotes saved`}
-            sublabel="Tap to view"
+            label={`${savedCount}/${getFreeSaveLimit()} quotes saved`}
+            sublabel="Tap to view saved quotes"
             delay={400}
             onClick={() => navigate("/saved")}
           />
