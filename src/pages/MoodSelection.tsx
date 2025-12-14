@@ -47,7 +47,7 @@ const MoodSelection = () => {
     setSelectedMood(moodId);
   };
   const handleContinue = () => {
-    navigate("/breathing", { state: { mood: selectedMood } });
+    navigate("/breathing-selection", { state: { mood: selectedMood } });
   };
   return <main className="min-h-screen bg-background flex flex-col animate-page-enter">
       {/* Fixed Header */}

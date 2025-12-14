@@ -1,31 +1,16 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { BreathingTechnique, breathingTechniques } from "./BreathingSelection";
 
 type MoodType = "overwhelmed" | "anxious" | "sad" | "nervous" | "neutral" | "calm" | "energized";
-type BreathPhase = "inhale" | "hold" | "exhale";
-
-const phaseConfig: Record<BreathPhase, { text: string; duration: number }> = {
-  inhale: { text: "Inhale", duration: 4 },
-  hold: { text: "Hold", duration: 7 },
-  exhale: { text: "Exhale", duration: 8 },
-};
-
-const PHASES: BreathPhase[] = ["inhale", "hold", "exhale"];
-const TOTAL_DURATION = 19; // 4 + 7 + 8 = 19 seconds
-
-// Box path points (with more padding for labels)
-const PATH = {
-  A: { x: 50, y: 280 },   // Bottom left (start)
-  B: { x: 50, y: 40 },    // Top left
-  C: { x: 310, y: 40 },   // Top right
-  D: { x: 310, y: 280 },  // Bottom right (end)
-};
 
 // Segment colors
-const SEGMENT_COLORS = {
+const SEGMENT_COLORS: Record<string, string> = {
   inhale: "#4A90E2",   // calm blue
+  "double-inhale": "#5BA3E8", // lighter blue
   hold: "#A8C5B5",     // soft teal/green
+  hold2: "#95B8A6",    // slightly darker teal
   exhale: "#8B7EC8",   // soft purple
 };
 
@@ -33,19 +18,33 @@ const Breathing = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const mood = location.state?.mood as MoodType || "calm";
+  
+  // Get technique from navigation state or localStorage fallback
+  const technique: BreathingTechnique = useMemo(() => {
+    if (location.state?.technique) {
+      return location.state.technique;
+    }
+    const savedId = localStorage.getItem("nudgeme_breathing_technique");
+    return breathingTechniques.find(t => t.id === savedId) || breathingTechniques[0];
+  }, [location.state?.technique]);
+
+  const phases = technique.phases;
+  const TOTAL_DURATION = technique.durationSeconds;
 
   const [showIntro, setShowIntro] = useState(true);
   const [isIntroExiting, setIsIntroExiting] = useState(false);
-  const [phase, setPhase] = useState<BreathPhase>("inhale");
-  const [phaseTimeLeft, setPhaseTimeLeft] = useState(phaseConfig.inhale.duration);
+  const [phaseIndex, setPhaseIndex] = useState(0);
+  const [phaseTimeLeft, setPhaseTimeLeft] = useState(phases[0].duration);
   const [totalProgress, setTotalProgress] = useState(0);
   const [isExiting, setIsExiting] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [showWellDone, setShowWellDone] = useState(false);
-  const [completedSegments, setCompletedSegments] = useState<BreathPhase[]>([]);
+  const [completedPhases, setCompletedPhases] = useState<number[]>([]);
   const [dotProgress, setDotProgress] = useState(0);
   const [textPulse, setTextPulse] = useState(false);
   const [timerPulse, setTimerPulse] = useState(false);
+
+  const currentPhase = phases[phaseIndex];
 
   const handleSkip = useCallback(() => {
     setIsExiting(true);
@@ -58,7 +57,7 @@ const Breathing = () => {
   useEffect(() => {
     if (showIntro) return;
 
-    let phaseIndex = 0;
+    let currentPhaseIdx = 0;
     let secondsInPhase = 0;
     let totalSeconds = 0;
 
@@ -66,8 +65,8 @@ const Breathing = () => {
       totalSeconds++;
       secondsInPhase++;
 
-      const currentPhase = PHASES[phaseIndex];
-      const phaseDuration = phaseConfig[currentPhase].duration;
+      const phase = phases[currentPhaseIdx];
+      const phaseDuration = phase.duration;
 
       // Update dot progress (0-100 within current phase)
       setDotProgress((secondsInPhase / phaseDuration) * 100);
@@ -82,11 +81,11 @@ const Breathing = () => {
 
       // Check if phase is complete
       if (secondsInPhase >= phaseDuration) {
-        setCompletedSegments((prev) => [...prev, currentPhase]);
-        phaseIndex++;
+        setCompletedPhases((prev) => [...prev, currentPhaseIdx]);
+        currentPhaseIdx++;
         secondsInPhase = 0;
 
-        if (phaseIndex >= PHASES.length) {
+        if (currentPhaseIdx >= phases.length) {
           // Breathing complete
           clearInterval(interval);
           setShowWellDone(true);
@@ -99,8 +98,8 @@ const Breathing = () => {
           return;
         }
 
-        setPhase(PHASES[phaseIndex]);
-        setPhaseTimeLeft(phaseConfig[PHASES[phaseIndex]].duration);
+        setPhaseIndex(currentPhaseIdx);
+        setPhaseTimeLeft(phases[currentPhaseIdx].duration);
         setDotProgress(0);
         setTextPulse(true);
         setTimeout(() => setTextPulse(false), 300);
@@ -108,23 +107,59 @@ const Breathing = () => {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [showIntro, navigate, mood]);
+  }, [showIntro, navigate, mood, phases, TOTAL_DURATION]);
 
-  // Calculate dot position on the box path
+  // Calculate dot position based on technique phases
   const getDotPosition = () => {
-    const phaseIndex = PHASES.indexOf(phase);
-    const points = [PATH.A, PATH.B, PATH.C, PATH.D];
-    const start = points[phaseIndex];
-    const end = points[phaseIndex + 1];
+    // For techniques with 3 phases (478, sigh): use 3-segment path
+    // For techniques with 4 phases (box): use 4-segment path (full box)
+    const numPhases = phases.length;
     const progress = dotProgress / 100;
-
-    return {
-      x: start.x + (end.x - start.x) * progress,
-      y: start.y + (end.y - start.y) * progress,
-    };
+    
+    if (numPhases === 4) {
+      // Box breathing: full square A→B→C→D→A
+      const points = [
+        { x: 40, y: 260 },  // A - bottom left
+        { x: 40, y: 40 },   // B - top left
+        { x: 260, y: 40 },  // C - top right
+        { x: 260, y: 260 }, // D - bottom right
+      ];
+      const start = points[phaseIndex];
+      const end = points[(phaseIndex + 1) % 4];
+      return {
+        x: start.x + (end.x - start.x) * progress,
+        y: start.y + (end.y - start.y) * progress,
+      };
+    } else {
+      // 3-phase techniques: A→B→C→D path
+      const points = [
+        { x: 40, y: 260 },  // A
+        { x: 40, y: 40 },   // B
+        { x: 260, y: 40 },  // C
+        { x: 260, y: 260 }, // D
+      ];
+      const start = points[phaseIndex];
+      const end = points[phaseIndex + 1];
+      return {
+        x: start.x + (end.x - start.x) * progress,
+        y: start.y + (end.y - start.y) * progress,
+      };
+    }
   };
 
   const dotPos = getDotPosition();
+
+  // Get phase display name
+  const getPhaseDisplayName = (phaseName: string) => {
+    switch (phaseName) {
+      case "inhale": return "Inhale";
+      case "double-inhale": return "Quick Inhale";
+      case "hold": return "Hold";
+      case "hold2": return "Hold";
+      case "exhale": return "Exhale";
+      default: return phaseName;
+    }
+  };
 
   // Handle manual start
   const handleStartBreathing = useCallback(() => {
@@ -136,21 +171,21 @@ const Breathing = () => {
   }, []);
 
   // Get segment opacity based on state
-  const getSegmentStyle = (segmentPhase: BreathPhase) => {
-    const isCompleted = completedSegments.includes(segmentPhase);
-    const isActive = phase === segmentPhase && !completedSegments.includes(segmentPhase);
-    const isFuture = !isCompleted && !isActive;
+  const getSegmentStyle = (segmentIndex: number) => {
+    const isCompleted = completedPhases.includes(segmentIndex);
+    const isActive = phaseIndex === segmentIndex && !completedPhases.includes(segmentIndex);
+    const phaseName = phases[segmentIndex]?.name || "inhale";
 
     if (isCompleted) {
       return {
-        stroke: SEGMENT_COLORS[segmentPhase],
+        stroke: SEGMENT_COLORS[phaseName] || "#4A90E2",
         strokeOpacity: 0.5,
         strokeDasharray: "none",
       };
     }
     if (isActive) {
       return {
-        stroke: SEGMENT_COLORS[segmentPhase],
+        stroke: SEGMENT_COLORS[phaseName] || "#4A90E2",
         strokeOpacity: 1,
         strokeDasharray: "none",
       };
@@ -161,6 +196,32 @@ const Breathing = () => {
       strokeOpacity: 0.25,
       strokeDasharray: "8 6",
     };
+  };
+
+  // Generate path segments based on technique
+  const renderPathSegments = () => {
+    const numPhases = phases.length;
+    
+    if (numPhases === 4) {
+      // Box breathing: 4 equal sides
+      return (
+        <>
+          <path d="M 40 260 L 40 40" strokeWidth="5" fill="none" strokeLinecap="round" style={{ ...getSegmentStyle(0), transition: "all 300ms ease" }} />
+          <path d="M 40 40 L 260 40" strokeWidth="5" fill="none" strokeLinecap="round" style={{ ...getSegmentStyle(1), transition: "all 300ms ease" }} />
+          <path d="M 260 40 L 260 260" strokeWidth="5" fill="none" strokeLinecap="round" style={{ ...getSegmentStyle(2), transition: "all 300ms ease" }} />
+          <path d="M 260 260 L 40 260" strokeWidth="5" fill="none" strokeLinecap="round" style={{ ...getSegmentStyle(3), transition: "all 300ms ease" }} />
+        </>
+      );
+    } else {
+      // 3-phase techniques: A→B→C→D
+      return (
+        <>
+          <path d="M 40 260 L 40 40" strokeWidth="5" fill="none" strokeLinecap="round" style={{ ...getSegmentStyle(0), transition: "all 300ms ease" }} />
+          <path d="M 40 40 L 260 40" strokeWidth="5" fill="none" strokeLinecap="round" style={{ ...getSegmentStyle(1), transition: "all 300ms ease" }} />
+          <path d="M 260 40 L 260 260" strokeWidth="5" fill="none" strokeLinecap="round" style={{ ...getSegmentStyle(2), transition: "all 300ms ease" }} />
+        </>
+      );
+    }
   };
 
   // Intro screen
@@ -183,7 +244,7 @@ const Breathing = () => {
               animationDelay: "0ms",
             }}
           >
-            Before we motivate you, we balance you
+            {technique.name}
           </h1>
 
           <p
@@ -194,11 +255,22 @@ const Breathing = () => {
               animationDelay: "200ms",
             }}
           >
-            Take 19 seconds for yourself
+            Take {technique.duration} for yourself
+          </p>
+
+          <p
+            className="mt-3 text-sm font-normal opacity-0"
+            style={{
+              color: "rgba(107, 107, 107, 0.8)",
+              animation: "fade-in-up 500ms ease-out forwards",
+              animationDelay: "300ms",
+            }}
+          >
+            {technique.benefits}
           </p>
 
           <div
-            className="mt-12 py-4 px-5 rounded-xl opacity-0"
+            className="mt-10 py-4 px-5 rounded-xl opacity-0"
             style={{
               backgroundColor: "rgba(255, 255, 255, 0.5)",
               border: "1px solid rgba(44, 62, 80, 0.1)",
@@ -213,7 +285,7 @@ const Breathing = () => {
               Scientific Evidence
             </p>
             <p className="mt-2 text-[13px] font-normal" style={{ color: "#6B6B6B" }}>
-              Spiegel & Huberman - Stanford Study | 2023
+              {technique.badge || technique.attribution}
             </p>
           </div>
 
@@ -300,7 +372,7 @@ const Breathing = () => {
             className="text-2xl font-semibold tracking-[-0.5px] animate-fade-in"
             style={{ color: "#2C3E50" }}
           >
-            {phaseConfig[phase].text}
+            {getPhaseDisplayName(currentPhase.name)}
           </p>
         </div>
 
@@ -313,42 +385,8 @@ const Breathing = () => {
             viewBox="0 0 300 300"
             className="animate-scale-in"
           >
-            {/* Adjusted path for 300x300 viewBox */}
-            {/* Segment 1: A→B (Inhale) - vertical up */}
-            <path
-              d="M 40 260 L 40 40"
-              strokeWidth="5"
-              fill="none"
-              strokeLinecap="round"
-              style={{
-                ...getSegmentStyle("inhale"),
-                transition: "all 300ms ease",
-              }}
-            />
-
-            {/* Segment 2: B→C (Hold) - horizontal right */}
-            <path
-              d="M 40 40 L 260 40"
-              strokeWidth="5"
-              fill="none"
-              strokeLinecap="round"
-              style={{
-                ...getSegmentStyle("hold"),
-                transition: "all 300ms ease",
-              }}
-            />
-
-            {/* Segment 3: C→D (Exhale) - vertical down */}
-            <path
-              d="M 260 40 L 260 260"
-              strokeWidth="5"
-              fill="none"
-              strokeLinecap="round"
-              style={{
-                ...getSegmentStyle("exhale"),
-                transition: "all 300ms ease",
-              }}
-            />
+            {/* Dynamic path segments based on technique */}
+            {renderPathSegments()}
 
             {/* Corner labels */}
             {[
@@ -374,8 +412,8 @@ const Breathing = () => {
 
             {/* Moving dot indicator */}
             <circle
-              cx={40 + (phase === "inhale" ? 0 : phase === "hold" ? 220 * (dotProgress / 100) : 220) + (phase === "hold" ? 0 : 0)}
-              cy={phase === "inhale" ? 260 - 220 * (dotProgress / 100) : phase === "hold" ? 40 : 40 + 220 * (dotProgress / 100)}
+              cx={dotPos.x}
+              cy={dotPos.y}
               r="10"
               fill="#2C3E50"
               stroke="white"
@@ -422,37 +460,20 @@ const Breathing = () => {
             />
           </div>
 
-          {/* Phase labels below progress bar */}
-          <div
-            className="w-full flex justify-between mt-2 text-xs"
-          >
-            <span
-              className="transition-all duration-200"
-              style={{
-                color: phase === "inhale" ? "#2C3E50" : "#6B6B6B",
-                fontWeight: phase === "inhale" ? 600 : 400,
-              }}
-            >
-              Inhale (4s)
-            </span>
-            <span
-              className="transition-all duration-200"
-              style={{
-                color: phase === "hold" ? "#2C3E50" : "#6B6B6B",
-                fontWeight: phase === "hold" ? 600 : 400,
-              }}
-            >
-              Hold (7s)
-            </span>
-            <span
-              className="transition-all duration-200"
-              style={{
-                color: phase === "exhale" ? "#2C3E50" : "#6B6B6B",
-                fontWeight: phase === "exhale" ? 600 : 400,
-              }}
-            >
-              Exhale (8s)
-            </span>
+          {/* Phase labels below progress bar - dynamically rendered */}
+          <div className="w-full flex justify-between mt-2 text-xs">
+            {phases.map((p, idx) => (
+              <span
+                key={p.name + idx}
+                className="transition-all duration-200"
+                style={{
+                  color: phaseIndex === idx ? "#2C3E50" : "#6B6B6B",
+                  fontWeight: phaseIndex === idx ? 600 : 400,
+                }}
+              >
+                {p.label}
+              </span>
+            ))}
           </div>
         </div>
       </div>

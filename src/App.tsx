@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Index from "./pages/Index";
 import MoodSelection from "./pages/MoodSelection";
+import BreathingSelection from "./pages/BreathingSelection";
 import Breathing from "./pages/Breathing";
 import Quotes from "./pages/Quotes";
 import SavedQuotes from "./pages/SavedQuotes";
@@ -25,6 +26,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/mood" element={<MoodSelection />} />
+            <Route path="/breathing-selection" element={<BreathingSelection />} />
             <Route path="/breathing" element={<Breathing />} />
             <Route path="/quotes" element={<Quotes />} />
             <Route path="/saved" element={<SavedQuotes />} />
