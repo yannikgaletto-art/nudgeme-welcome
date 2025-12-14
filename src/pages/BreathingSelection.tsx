@@ -214,96 +214,117 @@ we balance you
 
       {/* Technique Cards */}
       <section className="flex-1 px-6 py-6 overflow-y-auto">
-        <div className="max-w-[1040px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-5">
+        <div className="max-w-[1040px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-5">
           {sortedTechniques.map((technique, index) => {
-          const isRecommended = technique.id === recommendedId;
-          return <button key={technique.id} onClick={() => handleSelectTechnique(technique)} className={cn("relative bg-white rounded-[20px] p-6 text-left transition-all duration-200 opacity-0 min-h-[420px] max-w-[340px] mx-auto w-full flex flex-col", selectedId === technique.id ? "scale-[0.98]" : "hover:-translate-y-1 hover:shadow-lg")} style={{
-            border: "2px solid rgba(44, 62, 80, 0.15)",
-            boxShadow: "0 4px 16px rgba(44, 62, 80, 0.08)",
-            animation: "fade-in-up 500ms ease-out forwards",
-            animationDelay: `${200 + index * 50}ms`
-          }} aria-label={`Select ${technique.name}, ${technique.duration}${isRecommended ? ", recommended for you" : ""}`}>
-                {/* FOR YOU badge */}
-                {isRecommended && <span className="absolute top-4 right-4 text-[11px] font-bold uppercase tracking-wide px-3 py-1.5 rounded-full" style={{
-              backgroundColor: "#A8C5B5",
-              color: "#FFFFFF"
-            }}>
-                    FOR YOU
-                  </span>}
+            const isRecommended = technique.id === recommendedId;
+            return (
+              <button
+                key={technique.id}
+                onClick={() => handleSelectTechnique(technique)}
+                className={cn(
+                  "relative bg-white rounded-[20px] p-6 text-left transition-all duration-200 opacity-0 w-full flex flex-col",
+                  selectedId === technique.id ? "scale-[0.98]" : "hover:-translate-y-1 hover:shadow-lg"
+                )}
+                style={{
+                  height: "520px",
+                  border: "2px solid rgba(44, 62, 80, 0.15)",
+                  boxShadow: "0 4px 16px rgba(44, 62, 80, 0.08)",
+                  animation: "fade-in-up 500ms ease-out forwards",
+                  animationDelay: `${200 + index * 50}ms`
+                }}
+                aria-label={`Select ${technique.name}, ${technique.duration}${isRecommended ? ", recommended for you" : ""}`}
+              >
+                {/* Section 1 - Top Badge Area (28px) */}
+                <div className="h-[28px] flex-shrink-0 relative">
+                  {isRecommended && (
+                    <span
+                      className="absolute top-0 right-0 text-[11px] font-bold uppercase tracking-wide px-3 py-1.5 rounded-full"
+                      style={{ backgroundColor: "#A8C5B5", color: "#FFFFFF" }}
+                    >
+                      FOR YOU
+                    </span>
+                  )}
+                  {lastUsedId === technique.id && !isRecommended && (
+                    <span className="absolute top-0 right-0 flex items-center gap-1 text-[11px] font-medium" style={{ color: "#6B6B6B" }}>
+                      <Check size={12} />
+                      Last used
+                    </span>
+                  )}
+                </div>
 
-                {/* Last used indicator */}
-                {lastUsedId === technique.id && !isRecommended && <span className="absolute top-4 right-4 flex items-center gap-1 text-[11px] font-medium" style={{
-              color: "#6B6B6B"
-            }}>
-                    <Check size={12} />
-                    Last used
-                  </span>}
-
-                {/* Icon */}
-                <div className="flex justify-center pt-2 mb-4">
+                {/* Section 2 - Icon (72px) */}
+                <div className="h-[72px] flex-shrink-0 flex items-center justify-center">
                   <TechniqueIcon icon={technique.icon} />
                 </div>
 
-                {/* Headline */}
-                <h3 className="text-2xl font-semibold text-center" style={{
-              fontFamily: "'Playfair Display', serif",
-              color: "#2C3E50"
-            }}>
-                  {technique.headline}
-                </h3>
+                {/* Section 3 - Headline (64px) */}
+                <div className="h-[64px] flex-shrink-0 flex items-center justify-center">
+                  <h3
+                    className="text-2xl font-semibold text-center leading-tight line-clamp-2"
+                    style={{ fontFamily: "'Playfair Display', serif", color: "#2C3E50" }}
+                  >
+                    {technique.headline}
+                  </h3>
+                </div>
 
-                {/* Sub-headline */}
-                <p className="text-[15px] font-medium text-center mt-2" style={{
-              color: "#6B6B6B"
-            }}>
-                  {technique.subheadline}
-                </p>
+                {/* Section 4 - Sub-headline (40px) */}
+                <div className="h-[40px] flex-shrink-0 flex items-center justify-center">
+                  <p className="text-[15px] font-medium text-center line-clamp-2" style={{ color: "#6B6B6B" }}>
+                    {technique.subheadline}
+                  </p>
+                </div>
 
-                {/* Effect Label */}
-                
+                {/* Section 5 - Effect Label (32px) */}
+                <div className="h-[32px] flex-shrink-0 flex items-center justify-center">
+                  <p className="text-[13px] text-center" style={{ color: "rgba(107, 107, 107, 0.8)" }}>
+                    {technique.effectLabel}
+                  </p>
+                </div>
 
-                {/* Divider */}
-                <div className="w-4/5 mx-auto my-5" style={{
-              height: "1px",
-              backgroundColor: "rgba(44, 62, 80, 0.15)"
-            }} />
+                {/* Section 6 - Divider (24px) */}
+                <div className="h-[24px] flex-shrink-0 flex items-center justify-center">
+                  <div className="w-4/5 h-px" style={{ backgroundColor: "rgba(44, 62, 80, 0.15)" }} />
+                </div>
 
-                {/* Bullet Points */}
-                <ul className="space-y-2.5 pl-6 flex-1">
-                  {technique.bulletPoints.map((point, i) => <li key={i} className="flex items-start gap-2.5 text-sm leading-relaxed" style={{
-                color: "rgba(107, 107, 107, 0.85)"
-              }}>
-                      <Check size={14} className="flex-shrink-0 mt-0.5" style={{
-                  color: "#6B6B6B"
-                }} />
-                      <span>{point}</span>
-                    </li>)}
-                </ul>
+                {/* Section 7 - Bullet Points (120px) */}
+                <div className="h-[120px] flex-shrink-0 flex flex-col justify-center">
+                  <ul className="space-y-2 pl-6">
+                    {technique.bulletPoints.map((point, i) => (
+                      <li
+                        key={i}
+                        className="flex items-start gap-2.5 text-sm leading-relaxed"
+                        style={{ color: "rgba(107, 107, 107, 0.85)", height: "32px" }}
+                      >
+                        <Check size={14} className="flex-shrink-0 mt-0.5" style={{ color: "#6B6B6B" }} />
+                        <span className="line-clamp-2">{point}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
 
-                {/* Attribution */}
-                <p className="text-[13px] font-medium pl-6 mt-5" style={{
-              color: "#6B6B6B"
-            }}>
-                  {technique.attribution}
-                </p>
+                {/* Section 8 - Attribution (48px) */}
+                <div className="h-[48px] flex-shrink-0 flex items-center">
+                  <p className="text-[13px] font-medium pl-6 line-clamp-2" style={{ color: "#6B6B6B" }}>
+                    {technique.attribution}
+                  </p>
+                </div>
 
-                {/* Bottom Badge */}
-                <div className="flex justify-center mt-6">
-                  <span className="text-[11px] font-semibold px-3 py-1.5 rounded-lg" style={{
-                backgroundColor: "#2C3E50",
-                color: "#FFFFFF"
-              }}>
+                {/* Section 9 - Bottom Badge (44px) */}
+                <div className="h-[44px] flex-shrink-0 flex items-center justify-center">
+                  <span
+                    className="text-[11px] font-semibold px-4 py-2 rounded-lg"
+                    style={{ backgroundColor: "#2C3E50", color: "#FFFFFF" }}
+                  >
                     {technique.badge}
                   </span>
                 </div>
-              </button>;
-        })}
+              </button>
+            );
+          })}
         </div>
 
         {/* Scientific credibility footer */}
-        <p className="text-center mt-8 text-xs" style={{
-        color: "rgba(107, 107, 107, 0.5)"
-      }}>
+        <p className="text-center mt-8 text-xs" style={{ color: "rgba(107, 107, 107, 0.5)" }}>
           All techniques backed by peer-reviewed research and clinical practice.
         </p>
       </section>
