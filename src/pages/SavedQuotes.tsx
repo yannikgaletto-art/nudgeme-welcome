@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Heart, Share2, Trash2 } from "lucide-react";
+import { ArrowLeft, Heart, Share2, Trash2, Check, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 
@@ -20,6 +20,8 @@ const SavedQuotes = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [confirmRemove, setConfirmRemove] = useState<string | null>(null);
+  const [sharingId, setSharingId] = useState<string | null>(null);
+  const [shareSuccessId, setShareSuccessId] = useState<string | null>(null);
 
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -49,14 +51,43 @@ const SavedQuotes = () => {
   };
 
   const handleShare = async (quote: SavedQuote) => {
-    const shareText = `"${quote.text}" — ${quote.author}`;
-    if (navigator.share) {
-      try {
-        await navigator.share({ text: shareText });
-      } catch (err) {}
-    } else {
-      await navigator.clipboard.writeText(shareText);
-      toast({ title: "Copied!", description: "Quote copied to clipboard." });
+    if (sharingId) return;
+    
+    setSharingId(quote.id);
+    
+    const formattedText = `"${quote.text}"\n\n— ${quote.author}\n\nShared from NudgeMe`;
+    
+    const canShare = typeof navigator.share === "function";
+    const canCopy = typeof navigator.clipboard?.writeText === "function";
+    
+    try {
+      if (canShare) {
+        await navigator.share({
+          title: "NudgeMe Quote",
+          text: formattedText,
+        });
+        console.log("Share:", { quote: quote.text, author: quote.author, method: "native", source: "saved" });
+      } else if (canCopy) {
+        await navigator.clipboard.writeText(formattedText);
+        console.log("Share:", { quote: quote.text, author: quote.author, method: "clipboard", source: "saved" });
+        toast({
+          title: "Quote copied to clipboard!",
+          duration: 2000,
+        });
+      }
+      setShareSuccessId(quote.id);
+      setTimeout(() => setShareSuccessId(null), 500);
+    } catch (err: unknown) {
+      const error = err as Error;
+      if (error.name !== "AbortError") {
+        toast({
+          title: "Sharing failed. Try again.",
+          variant: "destructive",
+          duration: 2000,
+        });
+      }
+    } finally {
+      setSharingId(null);
     }
   };
 
@@ -157,11 +188,25 @@ const SavedQuotes = () => {
                 <div className="flex items-center gap-2 mt-4 justify-end">
                   <button
                     onClick={() => handleShare(quote)}
-                    className="w-9 h-9 flex items-center justify-center rounded-full transition-all duration-200 hover:scale-105 active:scale-95"
-                    style={{ border: "1.5px solid rgba(44, 62, 80, 0.2)" }}
-                    aria-label="Share quote"
+                    disabled={sharingId === quote.id}
+                    className={cn(
+                      "w-9 h-9 flex items-center justify-center rounded-full transition-all duration-200",
+                      sharingId !== quote.id && "hover:scale-105 active:scale-95",
+                      sharingId === quote.id && "opacity-60 cursor-not-allowed"
+                    )}
+                    style={{ 
+                      border: "1.5px solid rgba(44, 62, 80, 0.2)",
+                      transform: shareSuccessId === quote.id ? "scale(1.2)" : undefined,
+                    }}
+                    aria-label="Share this quote"
                   >
-                    <Share2 size={16} style={{ color: "#2C3E50" }} />
+                    {sharingId === quote.id ? (
+                      <Loader2 size={16} style={{ color: "#2C3E50" }} className="animate-spin" />
+                    ) : shareSuccessId === quote.id ? (
+                      <Check size={16} style={{ color: "#22c55e" }} />
+                    ) : (
+                      <Share2 size={16} style={{ color: "#2C3E50" }} />
+                    )}
                   </button>
                   {confirmRemove === quote.id ? (
                     <div className="flex items-center gap-2">
