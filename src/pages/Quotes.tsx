@@ -213,7 +213,7 @@ const Quotes = () => {
   const handleNextQuote = () => {
     if (filteredQuotes.length === 0) return;
     if (isLastQuote) {
-      navigate("/mood-selection");
+      navigate("/mood");
       return;
     }
     setIsCardAnimating(true);
@@ -384,7 +384,7 @@ const Quotes = () => {
         setIsCardAnimating(false);
       }, 200);
     } else {
-      navigate("/mood-selection");
+      navigate("/mood");
     }
   };
 
@@ -486,7 +486,7 @@ const Quotes = () => {
           <>
             {/* Mood Label Bar - Clickable to return to mood selection */}
             <button
-              onClick={() => navigate("/mood-selection")}
+              onClick={() => navigate("/mood")}
               className={cn(
                 "w-full max-w-[380px] h-[54px] rounded-3xl flex items-center justify-center mb-4 transition-all duration-200 cursor-pointer hover:scale-[1.02] active:scale-[0.97]",
                 isLoaded ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"
