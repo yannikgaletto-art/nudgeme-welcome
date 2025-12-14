@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import MoodSelection from "./pages/MoodSelection";
 import Breathing from "./pages/Breathing";
 import Quotes from "./pages/Quotes";
+import SavedQuotes from "./pages/SavedQuotes";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,6 +23,7 @@ const App = () => (
           <Route path="/mood" element={<MoodSelection />} />
           <Route path="/breathing" element={<Breathing />} />
           <Route path="/quotes" element={<Quotes />} />
+          <Route path="/saved" element={<SavedQuotes />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

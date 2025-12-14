@@ -25,6 +25,16 @@ interface CategoryQuote {
   category: CategoryType;
 }
 
+interface SavedQuote {
+  id: string;
+  text: string;
+  author: string;
+  source: string;
+  savedAt: number;
+}
+
+const STORAGE_KEY = "nudgeme_saved_quotes";
+
 const moodEmojis: Record<MoodType, string> = {
   overwhelmed: "😵",
   anxious: "😰",
@@ -164,7 +174,7 @@ const Quotes = () => {
   
   const [filteredQuotes, setFilteredQuotes] = useState<Quote[]>([]);
   const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0);
-  const [savedQuotes, setSavedQuotes] = useState<string[]>([]);
+  const [savedQuotes, setSavedQuotes] = useState<SavedQuote[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isCardAnimating, setIsCardAnimating] = useState(false);
   const [isSaveAnimating, setIsSaveAnimating] = useState(false);
@@ -173,8 +183,8 @@ const Quotes = () => {
   useEffect(() => {
     const moodQuotes = quotes.filter(q => q.primaryMood === mood);
     setFilteredQuotes(moodQuotes);
-    const saved = localStorage.getItem("savedQuotes");
-    if (saved) setSavedQuotes(JSON.parse(saved));
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) setSavedQuotes(JSON.parse(saved) as SavedQuote[]);
     setTimeout(() => setIsLoaded(true), 100);
   }, [mood]);
 
@@ -239,18 +249,39 @@ const Quotes = () => {
   };
 
   const handleSaveQuote = () => {
-    const quoteId = activeTab === "forYou" ? currentQuote?.id : currentCategoryQuote?.id;
-    if (!quoteId) return;
+    const quote = activeTab === "forYou" ? currentQuote : currentCategoryQuote;
+    if (!quote) return;
     
     setIsSaveAnimating(true);
     setTimeout(() => setIsSaveAnimating(false), 400);
     
-    const newSaved = savedQuotes.includes(quoteId)
-      ? savedQuotes.filter(id => id !== quoteId)
-      : [...savedQuotes, quoteId];
+    const isAlreadySaved = savedQuotes.some(q => q.id === quote.id);
     
-    setSavedQuotes(newSaved);
-    localStorage.setItem("savedQuotes", JSON.stringify(newSaved));
+    if (isAlreadySaved) {
+      const newSaved = savedQuotes.filter(q => q.id !== quote.id);
+      setSavedQuotes(newSaved);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(newSaved));
+      toast({ title: "Removed", duration: 1500 });
+    } else {
+      if (savedQuotes.length >= 20) {
+        toast({ title: "Limit reached", description: "Maximum 20 saved quotes.", duration: 2000 });
+        return;
+      }
+      const source = activeTab === "forYou" 
+        ? `${moodEmojis[mood]} ${moodLabels[mood]}`
+        : categoryLabels[(quote as CategoryQuote).category];
+      const newQuote: SavedQuote = {
+        id: quote.id,
+        text: quote.text,
+        author: quote.author,
+        source,
+        savedAt: Date.now(),
+      };
+      const newSaved = [...savedQuotes, newQuote];
+      setSavedQuotes(newSaved);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(newSaved));
+      toast({ title: "Saved!", duration: 1500 });
+    }
   };
 
   const handleShare = async () => {
@@ -286,8 +317,8 @@ const Quotes = () => {
   };
 
   const isSaved = activeTab === "forYou" 
-    ? (currentQuote ? savedQuotes.includes(currentQuote.id) : false)
-    : (currentCategoryQuote ? savedQuotes.includes(currentCategoryQuote.id) : false);
+    ? (currentQuote ? savedQuotes.some(q => q.id === currentQuote.id) : false)
+    : (currentCategoryQuote ? savedQuotes.some(q => q.id === currentCategoryQuote.id) : false);
 
   if (activeTab === "forYou" && !currentQuote) return null;
 
@@ -307,12 +338,18 @@ const Quotes = () => {
           <ArrowLeft size={24} />
         </button>
         <button
-          onClick={() => navigate("/")}
-          className="w-10 h-10 flex items-center justify-center rounded-full transition-all duration-200 hover:scale-105 active:scale-95"
-          style={{ color: "rgba(44, 62, 80, 0.6)" }}
-          aria-label="Close"
+          onClick={() => navigate("/saved")}
+          className="flex items-center gap-1.5 px-4 py-2 rounded-[20px] transition-all duration-200 hover:scale-105 active:scale-95"
+          style={{
+            backgroundColor: "rgba(255, 255, 255, 0.7)",
+            border: "1.5px solid rgba(44, 62, 80, 0.2)",
+          }}
+          aria-label={`View saved quotes (${savedQuotes.length})`}
         >
-          <X size={24} />
+          <Heart size={16} style={{ color: savedQuotes.length > 0 ? "#E63946" : "#2C3E50" }} fill={savedQuotes.length > 0 ? "#E63946" : "none"} />
+          <span className="text-sm font-semibold" style={{ color: "#2C3E50", fontFamily: "Inter, sans-serif" }}>
+            {savedQuotes.length}
+          </span>
         </button>
       </div>
 
