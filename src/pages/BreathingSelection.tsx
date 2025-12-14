@@ -2,7 +2,6 @@ import { useState, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, Check, Target, Moon, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
-
 export interface BreathingTechnique {
   id: string;
   name: string;
@@ -21,76 +20,86 @@ export interface BreathingTechnique {
     label: string;
   }[];
 }
-
-export const breathingTechniques: BreathingTechnique[] = [
-  {
-    id: "box",
-    name: "Box Breathing",
-    headline: "Focus & Clarity",
-    subheadline: "Box Breathing · 16 sec",
-    icon: "target",
-    duration: "16 seconds",
-    durationSeconds: 16,
-    effectLabel: "Balanced Alertness",
-    bulletPoints: [
-      "Sharpens mental focus",
-      "Stabilizes under pressure",
-      "Used by elite forces",
-    ],
-    attribution: "by Navy SEALs (Mark Divine)",
-    badge: "Elite Performance",
-    phases: [
-      { name: "inhale", duration: 4, label: "Inhale (4s)" },
-      { name: "hold", duration: 4, label: "Hold (4s)" },
-      { name: "exhale", duration: 4, label: "Exhale (4s)" },
-      { name: "hold2", duration: 4, label: "Hold (4s)" },
-    ],
-  },
-  {
-    id: "478",
-    name: "4-7-8 Breathing",
-    headline: "Sleep & Deep Calm",
-    subheadline: "4-7-8 Technique · 19 sec",
-    icon: "moon",
-    duration: "19 seconds",
-    durationSeconds: 19,
-    effectLabel: "Deep Relaxation",
-    bulletPoints: [
-      "Natural tranquilizer",
-      "Fall asleep faster",
-      "Lowers heart rate",
-    ],
-    attribution: "by Dr. Andrew Weil",
-    badge: "Best for Sleep",
-    phases: [
-      { name: "inhale", duration: 4, label: "Inhale (4s)" },
-      { name: "hold", duration: 7, label: "Hold (7s)" },
-      { name: "exhale", duration: 8, label: "Exhale (8s)" },
-    ],
-  },
-  {
-    id: "sigh",
-    name: "Physiological Sigh",
-    headline: "Instant Panic Reset",
-    subheadline: "Physiological Sigh · 10-15 sec",
-    icon: "zap",
-    duration: "10-15 seconds",
-    durationSeconds: 12,
-    effectLabel: "Rapid Stress Drop",
-    bulletPoints: [
-      "Fastest relief method",
-      "Emergency brake for anxiety",
-      "Opens collapsed airways",
-    ],
-    attribution: "by Prof. Huberman & Prof. Feldman",
-    badge: "Science-backed",
-    phases: [
-      { name: "inhale", duration: 4, label: "Inhale (4s)" },
-      { name: "double-inhale", duration: 1, label: "Quick Inhale (1s)" },
-      { name: "exhale", duration: 7, label: "Long Exhale (7s)" },
-    ],
-  },
-];
+export const breathingTechniques: BreathingTechnique[] = [{
+  id: "box",
+  name: "Box Breathing",
+  headline: "Focus & Clarity",
+  subheadline: "Box Breathing · 16 sec",
+  icon: "target",
+  duration: "16 seconds",
+  durationSeconds: 16,
+  effectLabel: "Balanced Alertness",
+  bulletPoints: ["Sharpens mental focus", "Stabilizes under pressure", "Used by elite forces"],
+  attribution: "by Navy SEALs (Mark Divine)",
+  badge: "Elite Performance",
+  phases: [{
+    name: "inhale",
+    duration: 4,
+    label: "Inhale (4s)"
+  }, {
+    name: "hold",
+    duration: 4,
+    label: "Hold (4s)"
+  }, {
+    name: "exhale",
+    duration: 4,
+    label: "Exhale (4s)"
+  }, {
+    name: "hold2",
+    duration: 4,
+    label: "Hold (4s)"
+  }]
+}, {
+  id: "478",
+  name: "4-7-8 Breathing",
+  headline: "Sleep & Deep Calm",
+  subheadline: "4-7-8 Technique · 19 sec",
+  icon: "moon",
+  duration: "19 seconds",
+  durationSeconds: 19,
+  effectLabel: "Deep Relaxation",
+  bulletPoints: ["Natural tranquilizer", "Fall asleep faster", "Lowers heart rate"],
+  attribution: "by Dr. Andrew Weil",
+  badge: "Best for Sleep",
+  phases: [{
+    name: "inhale",
+    duration: 4,
+    label: "Inhale (4s)"
+  }, {
+    name: "hold",
+    duration: 7,
+    label: "Hold (7s)"
+  }, {
+    name: "exhale",
+    duration: 8,
+    label: "Exhale (8s)"
+  }]
+}, {
+  id: "sigh",
+  name: "Physiological Sigh",
+  headline: "Instant Panic Reset",
+  subheadline: "Physiological Sigh · 10-15 sec",
+  icon: "zap",
+  duration: "10-15 seconds",
+  durationSeconds: 12,
+  effectLabel: "Rapid Stress Drop",
+  bulletPoints: ["Fastest relief method", "Emergency brake for anxiety", "Opens collapsed airways"],
+  attribution: "by Prof. Huberman & Prof. Feldman",
+  badge: "Science-backed",
+  phases: [{
+    name: "inhale",
+    duration: 4,
+    label: "Inhale (4s)"
+  }, {
+    name: "double-inhale",
+    duration: 1,
+    label: "Quick Inhale (1s)"
+  }, {
+    name: "exhale",
+    duration: 7,
+    label: "Long Exhale (7s)"
+  }]
+}];
 
 // Mood to recommended technique mapping
 const moodToTechnique: Record<string, string> = {
@@ -100,17 +109,20 @@ const moodToTechnique: Record<string, string> = {
   nervous: "478",
   neutral: "box",
   calm: "box",
-  energized: "box",
+  energized: "box"
 };
 
 // Icon component
-const TechniqueIcon = ({ icon }: { icon: "target" | "moon" | "zap" }) => {
+const TechniqueIcon = ({
+  icon
+}: {
+  icon: "target" | "moon" | "zap";
+}) => {
   const iconProps = {
     size: 48,
     strokeWidth: 2,
-    color: "#2C3E50",
+    color: "#2C3E50"
   };
-
   switch (icon) {
     case "target":
       return <Target {...iconProps} aria-label="Focus icon" />;
@@ -120,7 +132,6 @@ const TechniqueIcon = ({ icon }: { icon: "target" | "moon" | "zap" }) => {
       return <Zap {...iconProps} aria-label="Panic reset icon" />;
   }
 };
-
 const BreathingSelection = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -132,86 +143,71 @@ const BreathingSelection = () => {
 
   // Sort techniques: recommended first, then others
   const sortedTechniques = useMemo(() => {
-    const recommended = breathingTechniques.find((t) => t.id === recommendedId);
-    const others = breathingTechniques.filter((t) => t.id !== recommendedId);
+    const recommended = breathingTechniques.find(t => t.id === recommendedId);
+    const others = breathingTechniques.filter(t => t.id !== recommendedId);
     return recommended ? [recommended, ...others] : breathingTechniques;
   }, [recommendedId]);
-
   const handleBack = () => {
     navigate("/mood");
   };
-
   const handleSkip = () => {
-    navigate("/quotes", { state: { mood } });
+    navigate("/quotes", {
+      state: {
+        mood
+      }
+    });
   };
-
   const handleSelectTechnique = (technique: BreathingTechnique) => {
     setSelectedId(technique.id);
     setTimeout(() => {
       localStorage.setItem("nudgeme_breathing_technique", technique.id);
       localStorage.setItem("nudgeme_last_recommendation", recommendedId);
-      navigate("/breathing", { state: { mood, technique } });
+      navigate("/breathing", {
+        state: {
+          mood,
+          technique
+        }
+      });
     }, 200);
   };
-
   const lastUsedId = localStorage.getItem("nudgeme_breathing_technique");
-
-  return (
-    <main
-      className="min-h-screen w-full flex flex-col animate-page-enter"
-      style={{ backgroundColor: "#F5E6D3" }}
-    >
+  return <main className="min-h-screen w-full flex flex-col animate-page-enter" style={{
+    backgroundColor: "#F5E6D3"
+  }}>
       {/* Header */}
       <header className="flex items-center justify-between px-5 py-6">
-        <button
-          onClick={handleBack}
-          className="w-11 h-11 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors duration-200"
-          aria-label="Go back to mood selection"
-        >
+        <button onClick={handleBack} className="w-11 h-11 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors duration-200" aria-label="Go back to mood selection">
           <ArrowLeft size={24} />
         </button>
 
-        <h1
-          className="text-xl font-medium"
-          style={{
-            fontFamily: "'Playfair Display', serif",
-            color: "#2C3E50",
-          }}
-        >
+        <h1 className="text-xl font-medium" style={{
+        fontFamily: "'Playfair Display', serif",
+        color: "#2C3E50"
+      }}>
           Choose Your Technique
         </h1>
 
-        <button
-          onClick={handleSkip}
-          className="text-sm font-normal transition-colors duration-200"
-          style={{ color: "rgba(44, 62, 80, 0.6)" }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = "#2C3E50")}
-          onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(44, 62, 80, 0.6)")}
-        >
+        <button onClick={handleSkip} className="text-sm font-normal transition-colors duration-200" style={{
+        color: "rgba(44, 62, 80, 0.6)"
+      }} onMouseEnter={e => e.currentTarget.style.color = "#2C3E50"} onMouseLeave={e => e.currentTarget.style.color = "rgba(44, 62, 80, 0.6)"}>
           Skip
         </button>
       </header>
 
       {/* Page Title Section */}
       <section className="text-center px-6 py-4">
-        <h2
-          className="text-[28px] md:text-[32px] font-semibold leading-[1.3] tracking-[-0.4px] mx-auto max-w-[400px] opacity-0"
-          style={{
-            fontFamily: "'Playfair Display', serif",
-            color: "#2C3E50",
-            animation: "fade-in-up 600ms ease-out forwards",
-          }}
-        >
-          Before we nudge you, we balance you
-        </h2>
-        <p
-          className="mt-4 text-base font-normal opacity-0"
-          style={{
-            color: "rgba(107, 107, 107, 0.8)",
-            animation: "fade-in-up 500ms ease-out forwards",
-            animationDelay: "150ms",
-          }}
-        >
+        <h2 className="text-[28px] md:text-[32px] font-semibold leading-[1.3] tracking-[-0.4px] mx-auto max-w-[400px] opacity-0" style={{
+        fontFamily: "'Playfair Display', serif",
+        color: "#2C3E50",
+        animation: "fade-in-up 600ms ease-out forwards"
+      }}>Before we nudge you, 
+we balance you
+      </h2>
+        <p className="mt-4 text-base font-normal opacity-0" style={{
+        color: "rgba(107, 107, 107, 0.8)",
+        animation: "fade-in-up 500ms ease-out forwards",
+        animationDelay: "150ms"
+      }}>
           Take 10-20 seconds for yourself
         </p>
       </section>
@@ -220,49 +216,28 @@ const BreathingSelection = () => {
       <section className="flex-1 px-6 py-6 overflow-y-auto">
         <div className="max-w-[1040px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-5">
           {sortedTechniques.map((technique, index) => {
-            const isRecommended = technique.id === recommendedId;
-
-            return (
-              <button
-                key={technique.id}
-                onClick={() => handleSelectTechnique(technique)}
-                className={cn(
-                  "relative bg-white rounded-[20px] p-6 text-left transition-all duration-200 opacity-0 min-h-[420px] max-w-[340px] mx-auto w-full flex flex-col",
-                  selectedId === technique.id
-                    ? "scale-[0.98]"
-                    : "hover:-translate-y-1 hover:shadow-lg"
-                )}
-                style={{
-                  border: "2px solid rgba(44, 62, 80, 0.15)",
-                  boxShadow: "0 4px 16px rgba(44, 62, 80, 0.08)",
-                  animation: "fade-in-up 500ms ease-out forwards",
-                  animationDelay: `${200 + index * 50}ms`,
-                }}
-                aria-label={`Select ${technique.name}, ${technique.duration}${isRecommended ? ", recommended for you" : ""}`}
-              >
+          const isRecommended = technique.id === recommendedId;
+          return <button key={technique.id} onClick={() => handleSelectTechnique(technique)} className={cn("relative bg-white rounded-[20px] p-6 text-left transition-all duration-200 opacity-0 min-h-[420px] max-w-[340px] mx-auto w-full flex flex-col", selectedId === technique.id ? "scale-[0.98]" : "hover:-translate-y-1 hover:shadow-lg")} style={{
+            border: "2px solid rgba(44, 62, 80, 0.15)",
+            boxShadow: "0 4px 16px rgba(44, 62, 80, 0.08)",
+            animation: "fade-in-up 500ms ease-out forwards",
+            animationDelay: `${200 + index * 50}ms`
+          }} aria-label={`Select ${technique.name}, ${technique.duration}${isRecommended ? ", recommended for you" : ""}`}>
                 {/* FOR YOU badge */}
-                {isRecommended && (
-                  <span
-                    className="absolute top-4 right-4 text-[11px] font-bold uppercase tracking-wide px-3 py-1.5 rounded-full"
-                    style={{
-                      backgroundColor: "#A8C5B5",
-                      color: "#FFFFFF",
-                    }}
-                  >
+                {isRecommended && <span className="absolute top-4 right-4 text-[11px] font-bold uppercase tracking-wide px-3 py-1.5 rounded-full" style={{
+              backgroundColor: "#A8C5B5",
+              color: "#FFFFFF"
+            }}>
                     FOR YOU
-                  </span>
-                )}
+                  </span>}
 
                 {/* Last used indicator */}
-                {lastUsedId === technique.id && !isRecommended && (
-                  <span
-                    className="absolute top-4 right-4 flex items-center gap-1 text-[11px] font-medium"
-                    style={{ color: "#6B6B6B" }}
-                  >
+                {lastUsedId === technique.id && !isRecommended && <span className="absolute top-4 right-4 flex items-center gap-1 text-[11px] font-medium" style={{
+              color: "#6B6B6B"
+            }}>
                     <Check size={12} />
                     Last used
-                  </span>
-                )}
+                  </span>}
 
                 {/* Icon */}
                 <div className="flex justify-center pt-2 mb-4">
@@ -270,89 +245,65 @@ const BreathingSelection = () => {
                 </div>
 
                 {/* Headline */}
-                <h3
-                  className="text-2xl font-semibold text-center"
-                  style={{
-                    fontFamily: "'Playfair Display', serif",
-                    color: "#2C3E50",
-                  }}
-                >
+                <h3 className="text-2xl font-semibold text-center" style={{
+              fontFamily: "'Playfair Display', serif",
+              color: "#2C3E50"
+            }}>
                   {technique.headline}
                 </h3>
 
                 {/* Sub-headline */}
-                <p
-                  className="text-[15px] font-medium text-center mt-2"
-                  style={{ color: "#6B6B6B" }}
-                >
+                <p className="text-[15px] font-medium text-center mt-2" style={{
+              color: "#6B6B6B"
+            }}>
                   {technique.subheadline}
                 </p>
 
                 {/* Effect Label */}
-                <p
-                  className="text-[13px] text-center mt-3"
-                  style={{ color: "rgba(107, 107, 107, 0.8)" }}
-                >
-                  {technique.effectLabel}
-                </p>
+                
 
                 {/* Divider */}
-                <div
-                  className="w-4/5 mx-auto my-5"
-                  style={{
-                    height: "1px",
-                    backgroundColor: "rgba(44, 62, 80, 0.15)",
-                  }}
-                />
+                <div className="w-4/5 mx-auto my-5" style={{
+              height: "1px",
+              backgroundColor: "rgba(44, 62, 80, 0.15)"
+            }} />
 
                 {/* Bullet Points */}
                 <ul className="space-y-2.5 pl-6 flex-1">
-                  {technique.bulletPoints.map((point, i) => (
-                    <li
-                      key={i}
-                      className="flex items-start gap-2.5 text-sm leading-relaxed"
-                      style={{ color: "rgba(107, 107, 107, 0.85)" }}
-                    >
-                      <Check
-                        size={14}
-                        className="flex-shrink-0 mt-0.5"
-                        style={{ color: "#6B6B6B" }}
-                      />
+                  {technique.bulletPoints.map((point, i) => <li key={i} className="flex items-start gap-2.5 text-sm leading-relaxed" style={{
+                color: "rgba(107, 107, 107, 0.85)"
+              }}>
+                      <Check size={14} className="flex-shrink-0 mt-0.5" style={{
+                  color: "#6B6B6B"
+                }} />
                       <span>{point}</span>
-                    </li>
-                  ))}
+                    </li>)}
                 </ul>
 
                 {/* Attribution */}
-                <p
-                  className="text-[13px] font-medium pl-6 mt-5"
-                  style={{ color: "#6B6B6B" }}
-                >
+                <p className="text-[13px] font-medium pl-6 mt-5" style={{
+              color: "#6B6B6B"
+            }}>
                   {technique.attribution}
                 </p>
 
                 {/* Bottom Badge */}
                 <div className="flex justify-center mt-6">
-                  <span
-                    className="text-[11px] font-semibold px-3 py-1.5 rounded-lg"
-                    style={{
-                      backgroundColor: "#2C3E50",
-                      color: "#FFFFFF",
-                    }}
-                  >
+                  <span className="text-[11px] font-semibold px-3 py-1.5 rounded-lg" style={{
+                backgroundColor: "#2C3E50",
+                color: "#FFFFFF"
+              }}>
                     {technique.badge}
                   </span>
                 </div>
-              </button>
-            );
-          })}
+              </button>;
+        })}
         </div>
 
         {/* Scientific credibility footer */}
-        <p
-          className="text-center mt-8 text-xs"
-          style={{ color: "rgba(107, 107, 107, 0.5)" }}
-        >
+        <p className="text-center mt-8 text-xs" style={{
+        color: "rgba(107, 107, 107, 0.5)"
+      }}>
           All techniques backed by peer-reviewed research and clinical practice.
         </p>
       </section>
@@ -369,8 +320,6 @@ const BreathingSelection = () => {
           }
         }
       `}</style>
-    </main>
-  );
+    </main>;
 };
-
 export default BreathingSelection;
