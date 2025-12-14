@@ -8,6 +8,7 @@ import MoodSelection from "./pages/MoodSelection";
 import Breathing from "./pages/Breathing";
 import Quotes from "./pages/Quotes";
 import SavedQuotes from "./pages/SavedQuotes";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/breathing" element={<Breathing />} />
           <Route path="/quotes" element={<Quotes />} />
           <Route path="/saved" element={<SavedQuotes />} />
+          <Route path="/settings" element={<Settings />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
