@@ -266,7 +266,7 @@ const Breathing = () => {
               animationDelay: "300ms",
             }}
           >
-            {technique.benefits}
+            {technique.bulletPoints.join(" • ")}
           </p>
 
           <div
