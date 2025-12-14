@@ -289,150 +289,171 @@ const Breathing = () => {
 
       {/* Center content */}
       <div className="flex flex-col items-center">
-        {/* Instruction text above path */}
+        {/* Phase text above square */}
         <div
-          className="mb-[60px] text-center transition-all duration-400"
+          className="mb-8 text-center transition-all duration-300"
           style={{
-            transform: textPulse ? "scale(1.08)" : "scale(1)",
+            transform: textPulse ? "scale(1.05)" : "scale(1)",
           }}
         >
           <p
-            className="text-[28px] md:text-[32px] font-semibold tracking-[-0.5px] animate-fade-in"
+            className="text-2xl font-semibold tracking-[-0.5px] animate-fade-in"
             style={{ color: "#2C3E50" }}
           >
             {phaseConfig[phase].text}
           </p>
         </div>
 
-        {/* Box path visualization - larger */}
-        <svg
-          width="360"
-          height="320"
-          viewBox="0 0 360 320"
-          className="animate-scale-in w-[85vw] max-w-[360px] h-auto"
-        >
-          {/* Segment 1: A→B (Inhale) - vertical up */}
-          <path
-            d={`M ${PATH.A.x} ${PATH.A.y} L ${PATH.B.x} ${PATH.B.y}`}
-            strokeWidth="5"
-            fill="none"
-            strokeLinecap="round"
-            style={{
-              ...getSegmentStyle("inhale"),
-              transition: "all 300ms ease",
-            }}
-          />
-
-          {/* Segment 2: B→C (Hold) - horizontal right */}
-          <path
-            d={`M ${PATH.B.x} ${PATH.B.y} L ${PATH.C.x} ${PATH.C.y}`}
-            strokeWidth="5"
-            fill="none"
-            strokeLinecap="round"
-            style={{
-              ...getSegmentStyle("hold"),
-              transition: "all 300ms ease",
-            }}
-          />
-
-          {/* Segment 3: C→D (Exhale) - vertical down */}
-          <path
-            d={`M ${PATH.C.x} ${PATH.C.y} L ${PATH.D.x} ${PATH.D.y}`}
-            strokeWidth="5"
-            fill="none"
-            strokeLinecap="round"
-            style={{
-              ...getSegmentStyle("exhale"),
-              transition: "all 300ms ease",
-            }}
-          />
-
-          {/* Corner labels - text only, no circles */}
-          {[
-            { point: PATH.A, label: "A", offset: { x: -20, y: 8 } },
-            { point: PATH.B, label: "B", offset: { x: -20, y: 0 } },
-            { point: PATH.C, label: "C", offset: { x: 20, y: 0 } },
-            { point: PATH.D, label: "D", offset: { x: 20, y: 8 } },
-          ].map(({ point, label, offset }) => (
-            <text
-              key={label}
-              x={point.x + offset.x}
-              y={point.y + offset.y}
-              textAnchor="middle"
-              dominantBaseline="middle"
-              fontSize="16"
-              fontWeight="600"
-              fill="#2C3E50"
-              style={{ fontFamily: "Inter, sans-serif" }}
-            >
-              {label}
-            </text>
-          ))}
-
-          {/* Moving dot indicator */}
-          <circle
-            cx={dotPos.x}
-            cy={dotPos.y}
-            r="12"
-            fill="#2C3E50"
-            stroke="white"
-            strokeWidth="4"
-            style={{
-              filter: "drop-shadow(0 4px 12px rgba(44, 62, 80, 0.3))",
-              transition: "cx 100ms linear, cy 100ms linear",
-            }}
-          />
-        </svg>
-
-        {/* Countdown timer below path */}
-        <div
-          className="mt-20 flex items-center justify-center rounded-full"
-          style={{
-            width: "100px",
-            height: "100px",
-            border: "2px solid #2C3E50",
-            backgroundColor: "rgba(255, 255, 255, 0.3)",
-          }}
-        >
-          <span
-            className="text-[52px] font-semibold transition-transform"
-            style={{
-              color: "#2C3E50",
-              transform: timerPulse ? "scale(1.12)" : "scale(1)",
-              transitionDuration: "200ms",
-              transitionTimingFunction: "ease-out",
-            }}
+        {/* Square path container with centered countdown */}
+        <div className="relative w-[280px] h-[280px] sm:w-[300px] sm:h-[300px]">
+          {/* SVG path */}
+          <svg
+            width="100%"
+            height="100%"
+            viewBox="0 0 300 300"
+            className="animate-scale-in"
           >
-            {phaseTimeLeft}
-          </span>
-        </div>
-      </div>
+            {/* Adjusted path for 300x300 viewBox */}
+            {/* Segment 1: A→B (Inhale) - vertical up */}
+            <path
+              d="M 40 260 L 40 40"
+              strokeWidth="5"
+              fill="none"
+              strokeLinecap="round"
+              style={{
+                ...getSegmentStyle("inhale"),
+                transition: "all 300ms ease",
+              }}
+            />
 
-      {/* Progress bar at bottom */}
-      <div className="absolute bottom-12 left-10 right-10 flex flex-col items-center">
-        {/* Phase labels above progress bar */}
-        <div
-          className="w-full max-w-[480px] flex justify-between mb-2 text-[11px] font-medium"
-          style={{ color: "#6B6B6B" }}
-        >
-          <span>Inhale (4s)</span>
-          <span>Hold (7s)</span>
-          <span>Exhale (8s)</span>
-        </div>
+            {/* Segment 2: B→C (Hold) - horizontal right */}
+            <path
+              d="M 40 40 L 260 40"
+              strokeWidth="5"
+              fill="none"
+              strokeLinecap="round"
+              style={{
+                ...getSegmentStyle("hold"),
+                transition: "all 300ms ease",
+              }}
+            />
 
-        {/* Progress bar */}
-        <div
-          className="w-full max-w-[480px] h-3 rounded-md overflow-hidden"
-          style={{ backgroundColor: "rgba(44, 62, 80, 0.2)" }}
-        >
+            {/* Segment 3: C→D (Exhale) - vertical down */}
+            <path
+              d="M 260 40 L 260 260"
+              strokeWidth="5"
+              fill="none"
+              strokeLinecap="round"
+              style={{
+                ...getSegmentStyle("exhale"),
+                transition: "all 300ms ease",
+              }}
+            />
+
+            {/* Corner labels */}
+            {[
+              { x: 20, y: 268, label: "A" },
+              { x: 20, y: 40, label: "B" },
+              { x: 280, y: 40, label: "C" },
+              { x: 280, y: 268, label: "D" },
+            ].map(({ x, y, label }) => (
+              <text
+                key={label}
+                x={x}
+                y={y}
+                textAnchor="middle"
+                dominantBaseline="middle"
+                fontSize="14"
+                fontWeight="600"
+                fill="#2C3E50"
+                style={{ fontFamily: "Inter, sans-serif" }}
+              >
+                {label}
+              </text>
+            ))}
+
+            {/* Moving dot indicator */}
+            <circle
+              cx={40 + (phase === "inhale" ? 0 : phase === "hold" ? 220 * (dotProgress / 100) : 220) + (phase === "hold" ? 0 : 0)}
+              cy={phase === "inhale" ? 260 - 220 * (dotProgress / 100) : phase === "hold" ? 40 : 40 + 220 * (dotProgress / 100)}
+              r="10"
+              fill="#2C3E50"
+              stroke="white"
+              strokeWidth="3"
+              style={{
+                filter: "drop-shadow(0 3px 8px rgba(44, 62, 80, 0.3))",
+                transition: "cx 100ms linear, cy 100ms linear",
+              }}
+            />
+          </svg>
+
+          {/* Centered countdown inside square */}
           <div
-            className="h-full rounded-md"
-            style={{
-              width: `${totalProgress}%`,
-              backgroundColor: "#2C3E50",
-              transition: "width 1000ms linear",
-            }}
-          />
+            className="absolute inset-0 flex items-center justify-center pointer-events-none"
+          >
+            <span
+              className="text-7xl font-bold transition-transform"
+              style={{
+                color: "#2C3E50",
+                transform: timerPulse ? "scale(1.1)" : "scale(1)",
+                transitionDuration: "200ms",
+                transitionTimingFunction: "ease-out",
+              }}
+            >
+              {phaseTimeLeft}
+            </span>
+          </div>
+        </div>
+
+        {/* Progress bar - closer to square */}
+        <div className="mt-10 w-[280px] sm:w-[300px] flex flex-col items-center">
+          {/* Progress bar track */}
+          <div
+            className="w-full h-2 rounded-full overflow-hidden"
+            style={{ backgroundColor: "rgba(44, 62, 80, 0.2)" }}
+          >
+            <div
+              className="h-full rounded-full"
+              style={{
+                width: `${totalProgress}%`,
+                backgroundColor: "#2C3E50",
+                transition: "width 1000ms linear",
+              }}
+            />
+          </div>
+
+          {/* Phase labels below progress bar */}
+          <div
+            className="w-full flex justify-between mt-2 text-xs"
+          >
+            <span
+              className="transition-all duration-200"
+              style={{
+                color: phase === "inhale" ? "#2C3E50" : "#6B6B6B",
+                fontWeight: phase === "inhale" ? 600 : 400,
+              }}
+            >
+              Inhale (4s)
+            </span>
+            <span
+              className="transition-all duration-200"
+              style={{
+                color: phase === "hold" ? "#2C3E50" : "#6B6B6B",
+                fontWeight: phase === "hold" ? 600 : 400,
+              }}
+            >
+              Hold (7s)
+            </span>
+            <span
+              className="transition-all duration-200"
+              style={{
+                color: phase === "exhale" ? "#2C3E50" : "#6B6B6B",
+                fontWeight: phase === "exhale" ? 600 : 400,
+              }}
+            >
+              Exhale (8s)
+            </span>
+          </div>
         </div>
       </div>
     </main>
