@@ -52,7 +52,7 @@ export const breathingTechniques: BreathingTechnique[] = [{
 }, {
   id: "478",
   name: "4-7-8 Breathing",
-  headline: "Sleep & Deep Calm",
+  headline: "Deep Calm",
   subheadline: "4-7-8 Technique · 19 sec",
   icon: "moon",
   duration: "19 seconds",
