@@ -485,6 +485,21 @@
   animation: bounce-in 400ms cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
 }
 
+/* Premium shimmer effect */
+@keyframes premium-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.premium-shimmer {
+  background-size: 200% 100%;
+  animation: premium-shimmer 3s ease-in-out infinite;
+}
+
 /* Smooth scroll behavior */
 html {
   scroll-behavior: smooth;
@@ -502,7 +517,8 @@ html {
   }
   
   .animate-nudge-circle,
-  .animate-gentle-pulse {
+  .animate-gentle-pulse,
+  .premium-shimmer {
     animation: none !important;
   }
 }

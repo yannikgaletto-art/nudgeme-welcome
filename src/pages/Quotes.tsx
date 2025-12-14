@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Heart, Share2, ArrowLeft, Check, Loader2, Settings } from "lucide-react";
+import { Heart, Share2, ArrowLeft, Check, Loader2, Settings, Camera } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
+import PremiumModal from "@/components/PremiumModal";
+import PremiumBadge from "@/components/PremiumBadge";
+import { isSaveLimitReached, getFreeSaveLimit, trackPremiumPrompt, trackMaybeLater, shouldShowPremiumPrompt, isPremiumBannerDismissed, dismissPremiumBanner } from "@/lib/premium";
 
 type MoodType = "overwhelmed" | "anxious" | "sad" | "nervous" | "neutral" | "calm" | "energized";
 type CategoryType = "spirituality" | "politics" | "philosophy" | "sociology" | "sports" | "literature" | "science" | "business";
@@ -181,6 +184,9 @@ const Quotes = () => {
   const [isSharing, setIsSharing] = useState(false);
   const [shareSuccess, setShareSuccess] = useState(false);
   const [isTabSwitching, setIsTabSwitching] = useState(false);
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [premiumModalType, setPremiumModalType] = useState<"save" | "export" | "category">("save");
+  const [showPremiumBanner, setShowPremiumBanner] = useState(!isPremiumBannerDismissed());
 
   useEffect(() => {
     const moodQuotes = quotes.filter(q => q.primaryMood === mood);
@@ -254,10 +260,26 @@ const Quotes = () => {
     const quote = activeTab === "forYou" ? currentQuote : currentCategoryQuote;
     if (!quote) return;
     
+    const isAlreadySaved = savedQuotes.some(q => q.id === quote.id);
+    
+    // Check save limit for new saves
+    if (!isAlreadySaved && isSaveLimitReached(savedQuotes.length)) {
+      if (shouldShowPremiumPrompt()) {
+        setPremiumModalType("save");
+        setShowPremiumModal(true);
+        trackPremiumPrompt();
+      } else {
+        toast({ 
+          title: "Save limit reached", 
+          description: `Free users can save up to ${getFreeSaveLimit()} quotes.`, 
+          duration: 2500 
+        });
+      }
+      return;
+    }
+    
     setIsSaveAnimating(true);
     setTimeout(() => setIsSaveAnimating(false), 400);
-    
-    const isAlreadySaved = savedQuotes.some(q => q.id === quote.id);
     
     if (isAlreadySaved) {
       const newSaved = savedQuotes.filter(q => q.id !== quote.id);
@@ -265,10 +287,6 @@ const Quotes = () => {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(newSaved));
       toast({ title: "Removed", duration: 1500 });
     } else {
-      if (savedQuotes.length >= 20) {
-        toast({ title: "Limit reached", description: "Maximum 20 saved quotes.", duration: 2000 });
-        return;
-      }
       const source = activeTab === "forYou" 
         ? `${moodEmojis[mood]} ${moodLabels[mood]}`
         : categoryLabels[(quote as CategoryQuote).category];
@@ -283,6 +301,62 @@ const Quotes = () => {
       setSavedQuotes(newSaved);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(newSaved));
       toast({ title: "Saved!", duration: 1500 });
+    }
+  };
+
+  const handleExportImage = () => {
+    if (shouldShowPremiumPrompt()) {
+      setPremiumModalType("export");
+      setShowPremiumModal(true);
+      trackPremiumPrompt();
+    } else {
+      toast({ title: "Export as Image", description: "Premium feature coming soon!", duration: 2000 });
+    }
+  };
+
+  const handleCreateCategory = () => {
+    if (shouldShowPremiumPrompt()) {
+      setPremiumModalType("category");
+      setShowPremiumModal(true);
+      trackPremiumPrompt();
+    } else {
+      toast({ title: "Custom Categories", description: "Premium feature coming soon!", duration: 2000 });
+    }
+  };
+
+  const handlePremiumModalClose = () => {
+    setShowPremiumModal(false);
+    trackMaybeLater();
+  };
+
+  const handleDismissBanner = () => {
+    setShowPremiumBanner(false);
+    dismissPremiumBanner();
+  };
+
+  const getPremiumModalContent = () => {
+    switch (premiumModalType) {
+      case "save":
+        return {
+          icon: "❤️✨",
+          title: "Save Unlimited Quotes",
+          description: `Free users can save up to ${getFreeSaveLimit()} quotes. Upgrade to save unlimited favorites and access them anytime.`,
+          benefits: ["Unlimited saved quotes", "Sync across devices", "Never lose your favorites"],
+        };
+      case "export":
+        return {
+          icon: "📸✨",
+          title: "Beautiful Quote Images",
+          description: "Create stunning visual quotes to share on social media. Premium members can export any quote as a custom image.",
+          benefits: ["Custom backgrounds", "Multiple layouts", "High-resolution export"],
+        };
+      case "category":
+        return {
+          icon: "🗂️✨",
+          title: "Custom Categories",
+          description: "Organize quotes your way. Create personal categories and curate your own collections.",
+          benefits: ["Create unlimited categories", "Organize your favorites", "Personal curation"],
+        };
     }
   };
 
@@ -527,7 +601,7 @@ const Quotes = () => {
               <p className="text-[15px] font-normal italic mt-auto" style={{ color: "rgba(44, 62, 80, 0.7)" }}>
                 — {currentQuote.author}
               </p>
-              <div className="flex items-center gap-4 mt-8">
+              <div className="flex items-center gap-3 mt-8">
                 <button
                   onClick={handleSaveQuote}
                   className={cn("w-12 h-12 flex items-center justify-center rounded-3xl transition-all duration-200 hover:scale-105 active:scale-95", isSaveAnimating && "animate-pulse")}
@@ -559,49 +633,125 @@ const Quotes = () => {
                     <Share2 size={22} style={{ color: "#2C3E50" }} />
                   )}
                 </button>
+                <button
+                  onClick={handleExportImage}
+                  className="w-12 h-12 flex items-center justify-center rounded-3xl transition-all duration-200 hover:scale-105 active:scale-95 relative"
+                  style={{ 
+                    backgroundColor: "white", 
+                    border: "1.5px solid rgba(255, 215, 0, 0.4)",
+                  }}
+                  aria-label="Export as image (Premium)"
+                >
+                  <Camera size={22} style={{ color: "#FFD700" }} />
+                  <div className="absolute -top-1 -right-1">
+                    <PremiumBadge size="sm" showIcon={false} className="!px-1.5 !py-0.5 !text-[8px]" />
+                  </div>
+                </button>
               </div>
             </div>
           </>
         )}
 
         {activeTab === "explore" && !selectedCategory && (
-          <div className="w-full max-w-[420px] grid grid-cols-2 gap-4 mt-2">
-            {categories.map((category, index) => {
-              const count = categoryQuotes.filter(q => q.category === category).length;
-              return (
+          <div className="w-full max-w-[420px] flex flex-col gap-4 mt-2">
+            {/* Create Category Button */}
+            <button
+              onClick={handleCreateCategory}
+              className={cn(
+                "w-full h-12 rounded-2xl flex items-center justify-center gap-2 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]",
+                isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+              )}
+              style={{
+                backgroundColor: "rgba(255, 215, 0, 0.1)",
+                border: "1.5px dashed rgba(255, 215, 0, 0.5)",
+              }}
+            >
+              <span className="text-sm font-medium" style={{ color: "#B8860B", fontFamily: "Inter, sans-serif" }}>
+                + Create Category
+              </span>
+              <PremiumBadge size="sm" />
+            </button>
+
+            {/* Category Grid */}
+            <div className="grid grid-cols-2 gap-4">
+              {categories.map((category, index) => {
+                const count = categoryQuotes.filter(q => q.category === category).length;
+                return (
+                  <button
+                    key={category}
+                    onClick={() => handleCategorySelect(category)}
+                    className={cn(
+                      "aspect-square rounded-[20px] flex flex-col items-center justify-center cursor-pointer transition-all duration-200 hover:scale-[1.03] active:scale-[0.97]",
+                      isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+                    )}
+                    style={{
+                      backgroundColor: "white",
+                      border: "2px solid rgba(44, 62, 80, 0.2)",
+                      boxShadow: "0 4px 16px rgba(44, 62, 80, 0.1)",
+                      padding: "28px",
+                      transitionDelay: `${50 * index}ms`,
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = "rgba(44, 62, 80, 0.4)";
+                      e.currentTarget.style.boxShadow = "0 6px 24px rgba(44, 62, 80, 0.15)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = "rgba(44, 62, 80, 0.2)";
+                      e.currentTarget.style.boxShadow = "0 4px 16px rgba(44, 62, 80, 0.1)";
+                    }}
+                  >
+                    <span className="text-[44px]">{categoryEmojis[category]}</span>
+                    <span className="font-semibold text-base mt-4" style={{ color: "#2C3E50", fontFamily: "Inter, sans-serif" }}>
+                      {categoryLabels[category]}
+                    </span>
+                    <span className="text-xs mt-1" style={{ color: "#6B6B6B", fontFamily: "Inter, sans-serif" }}>
+                      ({count} quotes)
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Premium Banner */}
+            {showPremiumBanner && (
+              <div
+                className={cn(
+                  "w-full rounded-2xl p-5 relative transition-all duration-300",
+                  isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+                )}
+                style={{
+                  background: "linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 165, 0, 0.15) 100%)",
+                  border: "1.5px solid rgba(255, 215, 0, 0.3)",
+                  transitionDelay: "400ms",
+                }}
+              >
                 <button
-                  key={category}
-                  onClick={() => handleCategorySelect(category)}
-                  className={cn(
-                    "aspect-square rounded-[20px] flex flex-col items-center justify-center cursor-pointer transition-all duration-200 hover:scale-[1.03] active:scale-[0.97]",
-                    isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-                  )}
+                  onClick={handleDismissBanner}
+                  className="absolute top-3 right-3 w-6 h-6 flex items-center justify-center rounded-full transition-opacity hover:opacity-70"
+                  style={{ color: "rgba(44, 62, 80, 0.5)" }}
+                  aria-label="Dismiss banner"
+                >
+                  ×
+                </button>
+                <h3 className="font-semibold text-base mb-1" style={{ color: "#2C3E50", fontFamily: "Inter, sans-serif" }}>
+                  Want More Quotes?
+                </h3>
+                <p className="text-sm mb-3" style={{ color: "#6B6B6B", fontFamily: "Inter, sans-serif" }}>
+                  Premium members get 200+ additional quotes from exclusive categories
+                </p>
+                <button
+                  onClick={() => navigate("/premium")}
+                  className="h-10 px-5 rounded-full font-semibold text-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                   style={{
-                    backgroundColor: "white",
-                    border: "2px solid rgba(44, 62, 80, 0.2)",
-                    boxShadow: "0 4px 16px rgba(44, 62, 80, 0.1)",
-                    padding: "28px",
-                    transitionDelay: `${50 * index}ms`,
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = "rgba(44, 62, 80, 0.4)";
-                    e.currentTarget.style.boxShadow = "0 6px 24px rgba(44, 62, 80, 0.15)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = "rgba(44, 62, 80, 0.2)";
-                    e.currentTarget.style.boxShadow = "0 4px 16px rgba(44, 62, 80, 0.1)";
+                    backgroundColor: "#2C3E50",
+                    color: "white",
+                    fontFamily: "Inter, sans-serif",
                   }}
                 >
-                  <span className="text-[44px]">{categoryEmojis[category]}</span>
-                  <span className="font-semibold text-base mt-4" style={{ color: "#2C3E50", fontFamily: "Inter, sans-serif" }}>
-                    {categoryLabels[category]}
-                  </span>
-                  <span className="text-xs mt-1" style={{ color: "#6B6B6B", fontFamily: "Inter, sans-serif" }}>
-                    ({count} quotes)
-                  </span>
+                  Unlock Premium
                 </button>
-              );
-            })}
+              </div>
+            )}
           </div>
         )}
 
@@ -709,6 +859,17 @@ const Quotes = () => {
           </button>
         </div>
       )}
+
+      {/* Premium Modal */}
+      <PremiumModal
+        isOpen={showPremiumModal}
+        onClose={handlePremiumModalClose}
+        onUpgrade={() => {
+          setShowPremiumModal(false);
+          navigate("/premium");
+        }}
+        {...getPremiumModalContent()}
+      />
     </main>
   );
 };
