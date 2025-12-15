@@ -70,7 +70,7 @@ const getFlattenedPhases = (techniqueId: string): ExtendedPhase[] => {
   return [];
 };
 
-const TOTAL_CYCLES = 3;
+// TOTAL_CYCLES is now dynamic from route state
 
 const Breathing = () => {
   const navigate = useNavigate();
@@ -81,6 +81,9 @@ const Breathing = () => {
   const wantsReward = location.state?.wantsReward as boolean || false;
   const rewardType = location.state?.rewardType as "receive" | "do" | null || null;
   const doGoodScenario = location.state?.doGoodScenario as string | null || null;
+  
+  // Dynamic cycle count from cycle selection (default 3)
+  const totalCycles = location.state?.cycles as number || 3;
 
   // Get technique from navigation state or localStorage fallback
   const technique: BreathingTechnique = useMemo(() => {
@@ -169,7 +172,7 @@ const Breathing = () => {
 
         if (currentPhaseIdx >= cyclePhases.length) {
           // Cycle complete
-          if (currentCycleNum >= TOTAL_CYCLES) {
+          if (currentCycleNum >= totalCycles) {
             // All cycles complete
             clearInterval(interval);
             setShowWellDone(true);
@@ -339,7 +342,7 @@ const Breathing = () => {
               animationDelay: "350ms",
             }}
           >
-            3 cycles · {Math.round(cycleDuration * TOTAL_CYCLES / 60)} min
+            {totalCycles} cycles · {totalCycles === 2 ? "~40 sec" : "~1 min"}
           </p>
 
           <button
@@ -386,7 +389,7 @@ const Breathing = () => {
             animationDelay: "200ms",
           }}
         >
-          {TOTAL_CYCLES} cycles completed
+          {totalCycles} cycles completed
         </p>
       </main>
     );
@@ -444,7 +447,7 @@ const Breathing = () => {
       {/* Cycle counter at bottom */}
       <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-3">
         <div className="flex gap-2">
-          {Array.from({ length: TOTAL_CYCLES }).map((_, i) => (
+          {Array.from({ length: totalCycles }).map((_, i) => (
             <div
               key={i}
               className="w-2.5 h-2.5 rounded-full transition-all duration-300"
@@ -458,7 +461,7 @@ const Breathing = () => {
           className="text-base"
           style={{ color: "#6B7280" }}
         >
-          Cycle {currentCycle} of {TOTAL_CYCLES}
+          Cycle {currentCycle} of {totalCycles}
         </p>
       </div>
 

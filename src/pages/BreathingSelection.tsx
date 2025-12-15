@@ -250,7 +250,7 @@ const BreathingSelection = () => {
     setTimeout(() => {
       localStorage.setItem("nudgeme_breathing_technique", technique.id);
       localStorage.setItem("nudgeme_last_recommendation", recommendedId);
-      navigate("/breathing", {
+      navigate("/cycle-selection", {
         state: {
           mood,
           technique,
@@ -362,9 +362,9 @@ we balance you
                   </p>
                 </div>
 
-                {/* Section 5 - Effect Label (32px) */}
+                {/* Section 5 - Cycle Info (32px) */}
                 <div className="h-[32px] flex-shrink-0 flex items-center justify-center">
-                  
+                  <span className="text-sm" style={{ color: "#6B7280" }}>2-3 cycles</span>
                 </div>
 
                 {/* Section 6 - Divider (24px) */}
