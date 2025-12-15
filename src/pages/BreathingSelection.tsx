@@ -106,18 +106,22 @@ export const breathingTechniques: BreathingTechnique[] = [{
   id: "car-rage",
   name: "Pursed-Lip Breathing",
   headline: "Car Rage",
-  subheadline: "Pursed-Lip · 12-20 sec",
+  subheadline: "Pursed-Lip · 16 sec/cycle",
   icon: "wind",
-  duration: "12-20 seconds",
+  duration: "~48 seconds",
   durationSeconds: 16,
   effectLabel: "Anger Relief",
-  bulletPoints: ["Calms acute anger fast", "Activates vagus nerve", "Reduces pain anxiety"],
+  bulletPoints: ["Calms acute anger fast", "Activates vagus nerve", "Exhale through pursed lips"],
   attribution: "by Clinical Pain Research",
   badge: "Anger Relief",
   phases: [{
     name: "inhale",
     duration: 4,
     label: "Inhale (4s)"
+  }, {
+    name: "hold",
+    duration: 4,
+    label: "Hold (4s)"
   }, {
     name: "exhale",
     duration: 8,
@@ -127,48 +131,52 @@ export const breathingTechniques: BreathingTechnique[] = [{
   id: "reduce-brainfog",
   name: "Wim-Hof Breathing",
   headline: "Reduce Brainfog",
-  subheadline: "Wim-Hof · 15-25 sec",
+  subheadline: "Wim-Hof · 33 sec/cycle",
   icon: "brain",
-  duration: "15-25 seconds",
-  durationSeconds: 20,
+  duration: "~100 seconds",
+  durationSeconds: 33,
   effectLabel: "Mental Clarity",
-  bulletPoints: ["Instant mental clarity", "Boosts adrenaline safely", "Increases pain tolerance"],
+  bulletPoints: ["Instant mental clarity", "10 rapid breaths + hold", "Increases pain tolerance"],
   attribution: "by Radboud University 2024",
   badge: "Clear Mind",
   phases: [{
     name: "inhale",
-    duration: 3,
-    label: "Deep Inhale (3s)"
+    duration: 1,
+    label: "Rapid In"
   }, {
     name: "exhale",
-    duration: 2,
-    label: "Let Go (2s)"
+    duration: 1,
+    label: "Rapid Out"
   }, {
     name: "hold",
-    duration: 15,
-    label: "Hold (15s)"
+    duration: 10,
+    label: "Hold (10s)"
+  }, {
+    name: "inhale",
+    duration: 3,
+    label: "Recover"
   }]
 }, {
   id: "overthinking-healer",
   name: "Resonance Breathing",
   headline: "Overthinking Healer",
-  subheadline: "Resonance · 12-24 sec",
+  subheadline: "Resonance · 12 sec/cycle",
   icon: "heart",
-  duration: "12-24 seconds",
-  durationSeconds: 18,
+  duration: "~36 seconds",
+  durationSeconds: 12,
   effectLabel: "Stop Overthinking",
-  bulletPoints: ["Stops rumination loops", "Cardiac coherence", "Natural pain relief"],
+  bulletPoints: ["Stops rumination loops", "Cardiac coherence", "Pure sine wave rhythm"],
   attribution: "by Vagus Nerve Research",
   badge: "Stop Overthinking",
   badgeColor: "#A7C4BC",
   phases: [{
     name: "inhale",
-    duration: 5,
-    label: "Inhale (5s)"
+    duration: 6,
+    label: "Inhale (6s)"
   }, {
     name: "exhale",
-    duration: 5,
-    label: "Exhale (5s)"
+    duration: 6,
+    label: "Exhale (6s)"
   }]
 }];
 

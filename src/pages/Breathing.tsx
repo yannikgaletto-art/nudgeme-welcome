@@ -2,20 +2,74 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { BreathingTechnique, breathingTechniques } from "./BreathingSelection";
+import { NoseInhaleIcon, MouthExhaleIcon, HoldIcon } from "@/components/breathing/BreathingIcons";
+
 type MoodType = "overwhelmed" | "anxious" | "sad" | "nervous" | "neutral" | "calm" | "energized";
 
-// Segment colors
-const SEGMENT_COLORS: Record<string, string> = {
-  inhale: "#4A90E2",
-  // calm blue
-  "double-inhale": "#5BA3E8",
-  // lighter blue
-  hold: "#A8C5B5",
-  // soft teal/green
-  hold2: "#95B8A6",
-  // slightly darker teal
-  exhale: "#8B7EC8" // soft purple
+// Define extended phases for specific techniques
+interface ExtendedPhase {
+  name: "inhale" | "hold" | "exhale" | "rapid-inhale" | "rapid-exhale" | "retention" | "recovery" | "double-inhale" | "hold2";
+  duration: number;
+  label: string;
+  isPursed?: boolean;
+  repeatCount?: number;
+}
+
+// Technique-specific phase definitions (for 1 cycle)
+const getTechniquePhases = (techniqueId: string): ExtendedPhase[] => {
+  switch (techniqueId) {
+    case "car-rage":
+      // Pursed-Lip: Inhale 4s → Hold 4s → Exhale 8s (pursed)
+      return [
+        { name: "inhale", duration: 4, label: "Inhale" },
+        { name: "hold", duration: 4, label: "Hold" },
+        { name: "exhale", duration: 8, label: "Pursed Exhale", isPursed: true },
+      ];
+    case "reduce-brainfog":
+      // Wim-Hof: 10x rapid breaths (1s in, 1s out) → 10s retention → recovery inhale
+      return [
+        // Rapid breathing phase (represented as alternating)
+        { name: "rapid-inhale", duration: 1, label: "Rapid In", repeatCount: 10 },
+        { name: "rapid-exhale", duration: 1, label: "Rapid Out", repeatCount: 10 },
+        { name: "retention", duration: 10, label: "Hold" },
+        { name: "recovery", duration: 3, label: "Recover" },
+      ];
+    case "overthinking-healer":
+      // Resonance: Inhale 6s → Exhale 6s (no holds)
+      return [
+        { name: "inhale", duration: 6, label: "Inhale" },
+        { name: "exhale", duration: 6, label: "Exhale" },
+      ];
+    default:
+      return [];
+  }
 };
+
+// Get flattened phases for techniques with rapid breathing
+const getFlattenedPhases = (techniqueId: string): ExtendedPhase[] => {
+  if (techniqueId === "reduce-brainfog") {
+    const phases: ExtendedPhase[] = [];
+    // 10 rapid breath cycles
+    for (let i = 0; i < 10; i++) {
+      phases.push({ name: "rapid-inhale", duration: 1, label: `Breath ${i + 1}` });
+      phases.push({ name: "rapid-exhale", duration: 1, label: `Breath ${i + 1}` });
+    }
+    // Retention and recovery
+    phases.push({ name: "retention", duration: 10, label: "Hold" });
+    phases.push({ name: "recovery", duration: 3, label: "Recover" });
+    return phases;
+  }
+  
+  const customPhases = getTechniquePhases(techniqueId);
+  if (customPhases.length > 0) {
+    return customPhases;
+  }
+  
+  return [];
+};
+
+const TOTAL_CYCLES = 3;
+
 const Breathing = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -29,169 +83,110 @@ const Breathing = () => {
     const savedId = localStorage.getItem("nudgeme_breathing_technique");
     return breathingTechniques.find(t => t.id === savedId) || breathingTechniques[0];
   }, [location.state?.technique]);
-  const phases = technique.phases;
-  const TOTAL_DURATION = technique.durationSeconds;
+
+  // Check if this technique has custom phases
+  const hasCustomPhases = ["car-rage", "reduce-brainfog", "overthinking-healer"].includes(technique.id);
+  
+  // Get phases for one cycle
+  const cyclePhases: ExtendedPhase[] = useMemo(() => {
+    if (hasCustomPhases) {
+      return getFlattenedPhases(technique.id);
+    }
+    return technique.phases.map(p => ({
+      name: p.name as ExtendedPhase["name"],
+      duration: p.duration,
+      label: p.label,
+    }));
+  }, [technique, hasCustomPhases]);
+
+  const cycleDuration = useMemo(() => {
+    return cyclePhases.reduce((acc, p) => acc + p.duration, 0);
+  }, [cyclePhases]);
+
   const [showIntro, setShowIntro] = useState(true);
   const [isIntroExiting, setIsIntroExiting] = useState(false);
+  const [currentCycle, setCurrentCycle] = useState(1);
   const [phaseIndex, setPhaseIndex] = useState(0);
-  const [phaseTimeLeft, setPhaseTimeLeft] = useState(phases[0].duration);
-  const [totalProgress, setTotalProgress] = useState(0);
+  const [phaseTimeLeft, setPhaseTimeLeft] = useState(cyclePhases[0]?.duration || 4);
+  const [phaseProgress, setPhaseProgress] = useState(0);
+  const [cycleProgress, setCycleProgress] = useState(0);
   const [isExiting, setIsExiting] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [showWellDone, setShowWellDone] = useState(false);
-  const [completedPhases, setCompletedPhases] = useState<number[]>([]);
-  const [dotProgress, setDotProgress] = useState(0);
   const [textPulse, setTextPulse] = useState(false);
-  const [timerPulse, setTimerPulse] = useState(false);
-  const currentPhase = phases[phaseIndex];
+
+  const currentPhase = cyclePhases[phaseIndex];
+
   const handleSkip = useCallback(() => {
     setIsExiting(true);
     setTimeout(() => {
-      navigate("/quotes", {
-        state: {
-          mood
-        }
-      });
+      navigate("/quotes", { state: { mood } });
     }, 600);
   }, [navigate, mood]);
 
   // Breathing cycle logic
   useEffect(() => {
-    if (showIntro) return;
+    if (showIntro || showWellDone) return;
+
+    let currentCycleNum = 1;
     let currentPhaseIdx = 0;
     let secondsInPhase = 0;
-    let totalSeconds = 0;
+    let totalSecondsInCycle = 0;
+
     const interval = setInterval(() => {
-      totalSeconds++;
       secondsInPhase++;
-      const phase = phases[currentPhaseIdx];
+      totalSecondsInCycle++;
+      
+      const phase = cyclePhases[currentPhaseIdx];
       const phaseDuration = phase.duration;
 
-      // Update dot progress (0-100 within current phase)
-      setDotProgress(secondsInPhase / phaseDuration * 100);
+      // Update phase progress (0-100)
+      setPhaseProgress((secondsInPhase / phaseDuration) * 100);
+      
+      // Update cycle progress
+      setCycleProgress((totalSecondsInCycle / cycleDuration) * 100);
 
-      // Update countdown with pulse
+      // Update countdown
       setPhaseTimeLeft(phaseDuration - secondsInPhase);
-      setTimerPulse(true);
-      setTimeout(() => setTimerPulse(false), 250);
-
-      // Update total progress
-      setTotalProgress(totalSeconds / TOTAL_DURATION * 100);
 
       // Check if phase is complete
       if (secondsInPhase >= phaseDuration) {
-        setCompletedPhases(prev => [...prev, currentPhaseIdx]);
         currentPhaseIdx++;
         secondsInPhase = 0;
-        if (currentPhaseIdx >= phases.length) {
-          // Breathing complete
-          clearInterval(interval);
-          setShowWellDone(true);
-          setTimeout(() => {
-            setIsExiting(true);
+
+        if (currentPhaseIdx >= cyclePhases.length) {
+          // Cycle complete
+          if (currentCycleNum >= TOTAL_CYCLES) {
+            // All cycles complete
+            clearInterval(interval);
+            setShowWellDone(true);
             setTimeout(() => {
-              navigate("/quotes", {
-                state: {
-                  mood
-                }
-              });
-            }, 600);
-          }, 1500);
-          return;
+              setIsExiting(true);
+              setTimeout(() => {
+                navigate("/quotes", { state: { mood } });
+              }, 600);
+            }, 2000);
+            return;
+          }
+          
+          // Start next cycle
+          currentCycleNum++;
+          setCurrentCycle(currentCycleNum);
+          currentPhaseIdx = 0;
+          totalSecondsInCycle = 0;
+          setCycleProgress(0);
         }
+
         setPhaseIndex(currentPhaseIdx);
-        setPhaseTimeLeft(phases[currentPhaseIdx].duration);
-        setDotProgress(0);
+        setPhaseTimeLeft(cyclePhases[currentPhaseIdx]?.duration || 0);
+        setPhaseProgress(0);
         setTextPulse(true);
         setTimeout(() => setTextPulse(false), 300);
       }
     }, 1000);
+
     return () => clearInterval(interval);
-  }, [showIntro, navigate, mood, phases, TOTAL_DURATION]);
-
-  // Calculate dot position based on technique phases
-  const getDotPosition = () => {
-    // For techniques with 3 phases (478, sigh): use 3-segment path
-    // For techniques with 4 phases (box): use 4-segment path (full box)
-    const numPhases = phases.length;
-    const progress = dotProgress / 100;
-    if (numPhases === 4) {
-      // Box breathing: full square A→B→C→D→A
-      const points = [{
-        x: 40,
-        y: 260
-      },
-      // A - bottom left
-      {
-        x: 40,
-        y: 40
-      },
-      // B - top left
-      {
-        x: 260,
-        y: 40
-      },
-      // C - top right
-      {
-        x: 260,
-        y: 260
-      } // D - bottom right
-      ];
-      const start = points[phaseIndex];
-      const end = points[(phaseIndex + 1) % 4];
-      return {
-        x: start.x + (end.x - start.x) * progress,
-        y: start.y + (end.y - start.y) * progress
-      };
-    } else {
-      // 3-phase techniques: A→B→C→D path
-      const points = [{
-        x: 40,
-        y: 260
-      },
-      // A
-      {
-        x: 40,
-        y: 40
-      },
-      // B
-      {
-        x: 260,
-        y: 40
-      },
-      // C
-      {
-        x: 260,
-        y: 260
-      } // D
-      ];
-      const start = points[phaseIndex];
-      const end = points[phaseIndex + 1];
-      return {
-        x: start.x + (end.x - start.x) * progress,
-        y: start.y + (end.y - start.y) * progress
-      };
-    }
-  };
-  const dotPos = getDotPosition();
-
-  // Get phase display name
-  const getPhaseDisplayName = (phaseName: string) => {
-    switch (phaseName) {
-      case "inhale":
-        return "Inhale";
-      case "double-inhale":
-        return "Quick Inhale";
-      case "hold":
-        return "Hold";
-      case "hold2":
-        return "Hold";
-      case "exhale":
-        return "Exhale";
-      default:
-        return phaseName;
-    }
-  };
+  }, [showIntro, showWellDone, navigate, mood, cyclePhases, cycleDuration]);
 
   // Handle manual start
   const handleStartBreathing = useCallback(() => {
@@ -202,241 +197,328 @@ const Breathing = () => {
     }, 400);
   }, []);
 
-  // Get segment opacity based on state
-  const getSegmentStyle = (segmentIndex: number) => {
-    const isCompleted = completedPhases.includes(segmentIndex);
-    const isActive = phaseIndex === segmentIndex && !completedPhases.includes(segmentIndex);
-    const phaseName = phases[segmentIndex]?.name || "inhale";
-    if (isCompleted) {
-      return {
-        stroke: SEGMENT_COLORS[phaseName] || "#4A90E2",
-        strokeOpacity: 0.5,
-        strokeDasharray: "none"
-      };
+  // Get phase display icon
+  const renderPhaseIcon = () => {
+    if (!currentPhase) return null;
+    
+    const phaseName = currentPhase.name;
+    
+    if (phaseName === "inhale" || phaseName === "rapid-inhale" || phaseName === "double-inhale" || phaseName === "recovery") {
+      return <NoseInhaleIcon seconds={phaseTimeLeft} />;
     }
-    if (isActive) {
-      return {
-        stroke: SEGMENT_COLORS[phaseName] || "#4A90E2",
-        strokeOpacity: 1,
-        strokeDasharray: "none"
-      };
+    
+    if (phaseName === "exhale" || phaseName === "rapid-exhale") {
+      const isPursed = currentPhase.isPursed || technique.id === "car-rage";
+      return <MouthExhaleIcon seconds={phaseTimeLeft} pursed={isPursed} />;
     }
-    // Future
-    return {
-      stroke: "#2C3E50",
-      strokeOpacity: 0.25,
-      strokeDasharray: "8 6"
-    };
+    
+    if (phaseName === "hold" || phaseName === "hold2" || phaseName === "retention") {
+      return <HoldIcon seconds={phaseTimeLeft} />;
+    }
+    
+    return null;
   };
 
-  // Generate path segments based on technique
-  const renderPathSegments = () => {
-    const numPhases = phases.length;
-    if (numPhases === 4) {
-      // Box breathing: 4 equal sides
-      return <>
-          <path d="M 40 260 L 40 40" strokeWidth="5" fill="none" strokeLinecap="round" style={{
-          ...getSegmentStyle(0),
-          transition: "all 300ms ease"
-        }} />
-          <path d="M 40 40 L 260 40" strokeWidth="5" fill="none" strokeLinecap="round" style={{
-          ...getSegmentStyle(1),
-          transition: "all 300ms ease"
-        }} />
-          <path d="M 260 40 L 260 260" strokeWidth="5" fill="none" strokeLinecap="round" style={{
-          ...getSegmentStyle(2),
-          transition: "all 300ms ease"
-        }} />
-          <path d="M 260 260 L 40 260" strokeWidth="5" fill="none" strokeLinecap="round" style={{
-          ...getSegmentStyle(3),
-          transition: "all 300ms ease"
-        }} />
-        </>;
-    } else {
-      // 3-phase techniques: A→B→C→D
-      return <>
-          <path d="M 40 260 L 40 40" strokeWidth="5" fill="none" strokeLinecap="round" style={{
-          ...getSegmentStyle(0),
-          transition: "all 300ms ease"
-        }} />
-          <path d="M 40 40 L 260 40" strokeWidth="5" fill="none" strokeLinecap="round" style={{
-          ...getSegmentStyle(1),
-          transition: "all 300ms ease"
-        }} />
-          <path d="M 260 40 L 260 260" strokeWidth="5" fill="none" strokeLinecap="round" style={{
-          ...getSegmentStyle(2),
-          transition: "all 300ms ease"
-        }} />
-        </>;
+  // Render sine wave SVG
+  const renderSineWave = () => {
+    const width = 320;
+    const height = 160;
+    const centerY = height / 2;
+    const amplitude = 50;
+    
+    // Calculate dot position based on cycle progress
+    const dotX = (cycleProgress / 100) * width;
+    
+    // Calculate Y based on current phase
+    let dotY = centerY;
+    const phaseName = currentPhase?.name;
+    
+    if (phaseName === "inhale" || phaseName === "rapid-inhale" || phaseName === "recovery" || phaseName === "double-inhale") {
+      // Going up
+      dotY = centerY - amplitude * Math.sin((phaseProgress / 100) * (Math.PI / 2));
+    } else if (phaseName === "exhale" || phaseName === "rapid-exhale") {
+      // Going down from top
+      dotY = centerY - amplitude + (amplitude * 2) * Math.sin((phaseProgress / 100) * (Math.PI / 2));
+    } else if (phaseName === "hold") {
+      // At top
+      dotY = centerY - amplitude;
+    } else if (phaseName === "retention" || phaseName === "hold2") {
+      // At bottom or center
+      dotY = centerY + amplitude * 0.5;
     }
+
+    // Generate wave path
+    let pathD = `M 0 ${centerY}`;
+    for (let x = 0; x <= width; x += 4) {
+      const progress = x / width;
+      const y = centerY - amplitude * Math.sin(progress * Math.PI * 2);
+      pathD += ` L ${x} ${y}`;
+    }
+
+    return (
+      <div className="relative w-full max-w-[340px] mx-auto mb-8">
+        <svg
+          width="100%"
+          viewBox={`0 0 ${width} ${height}`}
+          className="overflow-visible"
+        >
+          {/* Guide lines */}
+          <line
+            x1="0" y1={centerY - amplitude}
+            x2={width} y2={centerY - amplitude}
+            stroke="rgba(44, 62, 80, 0.1)"
+            strokeWidth="1"
+            strokeDasharray="4 4"
+          />
+          <line
+            x1="0" y1={centerY + amplitude}
+            x2={width} y2={centerY + amplitude}
+            stroke="rgba(44, 62, 80, 0.1)"
+            strokeWidth="1"
+            strokeDasharray="4 4"
+          />
+          
+          {/* Background wave path */}
+          <path
+            d={pathD}
+            fill="none"
+            stroke="rgba(44, 62, 80, 0.15)"
+            strokeWidth="3"
+            strokeLinecap="round"
+          />
+          
+          {/* Active wave path (up to current position) */}
+          <path
+            d={pathD}
+            fill="none"
+            stroke="#2C3E50"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeDasharray={width}
+            strokeDashoffset={width - (cycleProgress / 100) * width}
+            style={{ transition: "stroke-dashoffset 100ms linear" }}
+          />
+          
+          {/* Moving dot */}
+          <circle
+            cx={Math.max(10, Math.min(dotX, width - 10))}
+            cy={dotY}
+            r="10"
+            fill="#2C3E50"
+            stroke="white"
+            strokeWidth="3"
+            style={{
+              filter: "drop-shadow(0 2px 6px rgba(44, 62, 80, 0.3))",
+              transition: "cx 100ms linear, cy 150ms cubic-bezier(0.4, 0, 0.2, 1)",
+            }}
+          />
+        </svg>
+      </div>
+    );
   };
 
   // Intro screen
   if (showIntro) {
-    return <main className={cn("min-h-screen w-full flex flex-col items-center justify-center px-8 transition-opacity duration-400", isIntroExiting ? "opacity-0" : "opacity-100")} style={{
-      backgroundColor: "#F5E6D3"
-    }}>
+    return (
+      <main
+        className={cn(
+          "min-h-screen w-full flex flex-col items-center justify-center px-8 transition-opacity duration-400",
+          isIntroExiting ? "opacity-0" : "opacity-100"
+        )}
+        style={{ backgroundColor: "#F5E6D3" }}
+      >
         <div className="text-center max-w-[380px]">
-          <h1 className="text-[28px] md:text-[32px] font-medium leading-[1.3] tracking-[-0.4px] opacity-0" style={{
-          fontFamily: "'Playfair Display', serif",
-          color: "#2C3E50",
-          animation: "fade-in-up 600ms ease-out forwards",
-          animationDelay: "0ms"
-        }}>
-            {technique.name}
+          <h1
+            className="text-[28px] md:text-[32px] font-medium leading-[1.3] tracking-[-0.4px] opacity-0"
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              color: "#2C3E50",
+              animation: "fade-in-up 600ms ease-out forwards",
+              animationDelay: "0ms",
+            }}
+          >
+            {technique.headline || technique.name}
           </h1>
 
-          <p className="mt-8 text-lg font-normal opacity-0" style={{
-          color: "#6B6B6B",
-          animation: "fade-in-up 500ms ease-out forwards",
-          animationDelay: "200ms"
-        }}>
-            Take {technique.duration} for yourself
+          <p
+            className="mt-6 text-base font-normal opacity-0"
+            style={{
+              color: "#6B6B6B",
+              animation: "fade-in-up 500ms ease-out forwards",
+              animationDelay: "200ms",
+            }}
+          >
+            {technique.bulletPoints[0]}
           </p>
 
-          <p className="mt-3 text-sm font-normal opacity-0" style={{
-          color: "rgba(107, 107, 107, 0.8)",
-          animation: "fade-in-up 500ms ease-out forwards",
-          animationDelay: "300ms"
-        }}>
-            {technique.bulletPoints.join(" • ")}
+          <p
+            className="mt-8 text-lg font-medium opacity-0"
+            style={{
+              color: "#2C3E50",
+              animation: "fade-in-up 500ms ease-out forwards",
+              animationDelay: "300ms",
+            }}
+          >
+            3 cycles · {Math.round(cycleDuration * TOTAL_CYCLES / 60)} min
           </p>
 
-          
-
-          <button onClick={handleStartBreathing} className="mt-14 w-full max-w-[300px] h-14 rounded-[28px] text-base font-medium transition-all duration-200 hover:scale-[1.02] opacity-0" style={{
-          backgroundColor: "#2C3E50",
-          color: "white",
-          boxShadow: "0 4px 16px rgba(44, 62, 80, 0.2)",
-          animation: "fade-in-up 500ms ease-out forwards",
-          animationDelay: "600ms"
-        }} onMouseEnter={e => {
-          e.currentTarget.style.backgroundColor = "#1A2634";
-          e.currentTarget.style.boxShadow = "0 6px 20px rgba(44, 62, 80, 0.25)";
-        }} onMouseLeave={e => {
-          e.currentTarget.style.backgroundColor = "#2C3E50";
-          e.currentTarget.style.boxShadow = "0 4px 16px rgba(44, 62, 80, 0.2)";
-        }}>
+          <button
+            onClick={handleStartBreathing}
+            className="mt-12 w-full max-w-[300px] h-14 rounded-[28px] text-base font-medium transition-all duration-200 hover:scale-[1.02] opacity-0"
+            style={{
+              backgroundColor: "#2C3E50",
+              color: "white",
+              boxShadow: "0 4px 16px rgba(44, 62, 80, 0.2)",
+              animation: "fade-in-up 500ms ease-out forwards",
+              animationDelay: "500ms",
+            }}
+          >
             Let's Breathe
           </button>
         </div>
-      </main>;
+      </main>
+    );
   }
 
   // Well done screen
   if (showWellDone) {
-    return <main className={cn("min-h-screen w-full flex items-center justify-center transition-opacity duration-600", isExiting ? "opacity-0" : "opacity-100")} style={{
-      backgroundColor: "#F5E6D3"
-    }}>
-        <h1 className="text-[28px] font-medium animate-fade-in" style={{
-        fontFamily: "'Playfair Display', serif",
-        color: "#2C3E50"
-      }}>
+    return (
+      <main
+        className={cn(
+          "min-h-screen w-full flex flex-col items-center justify-center transition-opacity duration-600",
+          isExiting ? "opacity-0" : "opacity-100"
+        )}
+        style={{ backgroundColor: "#F5E6D3" }}
+      >
+        <h1
+          className="text-[32px] font-medium animate-fade-in"
+          style={{
+            fontFamily: "'Playfair Display', serif",
+            color: "#2C3E50",
+          }}
+        >
           Well done
         </h1>
-      </main>;
+        <p
+          className="mt-4 text-lg animate-fade-in"
+          style={{
+            color: "#6B6B6B",
+            animationDelay: "200ms",
+          }}
+        >
+          {TOTAL_CYCLES} cycles completed
+        </p>
+      </main>
+    );
   }
-  return <main className={cn("min-h-screen w-full flex flex-col items-center justify-center relative transition-all duration-500", isExiting ? "opacity-0" : "opacity-100", isLoaded ? "opacity-100" : "opacity-0")} style={{
-    backgroundColor: "#F5E6D3"
-  }}>
+
+  return (
+    <main
+      className={cn(
+        "min-h-screen w-full flex flex-col items-center justify-center relative transition-all duration-500 px-6",
+        isExiting ? "opacity-0" : "opacity-100",
+        isLoaded ? "opacity-100" : "opacity-0"
+      )}
+      style={{ backgroundColor: "#F5E6D3" }}
+    >
       {/* Skip button */}
-      <button onClick={handleSkip} className="absolute top-7 right-5 text-[15px] font-normal z-10 transition-all duration-200 hover:underline" style={{
-      color: "rgba(44, 62, 80, 0.6)"
-    }} onMouseEnter={e => e.currentTarget.style.color = "#2C3E50"} onMouseLeave={e => e.currentTarget.style.color = "rgba(44, 62, 80, 0.6)"} aria-label="Skip breathing exercise">
+      <button
+        onClick={handleSkip}
+        className="absolute top-7 right-5 text-[15px] font-normal z-10 transition-all duration-200 hover:underline"
+        style={{ color: "rgba(44, 62, 80, 0.6)" }}
+        aria-label="Skip breathing exercise"
+      >
         Skip
       </button>
 
+      {/* Cycle indicator */}
+      <div className="absolute top-7 left-5 flex gap-2">
+        {Array.from({ length: TOTAL_CYCLES }).map((_, i) => (
+          <div
+            key={i}
+            className="w-2.5 h-2.5 rounded-full transition-all duration-300"
+            style={{
+              backgroundColor: i < currentCycle ? "#2C3E50" : "rgba(44, 62, 80, 0.2)",
+            }}
+          />
+        ))}
+      </div>
+
       {/* Center content */}
-      <div className="flex flex-col items-center">
-        {/* Phase text above square */}
-        <div className="mb-8 text-center transition-all duration-300" style={{
-        transform: textPulse ? "scale(1.05)" : "scale(1)"
-      }}>
-          <p className="text-2xl font-semibold tracking-[-0.5px] animate-fade-in" style={{
-          color: "#2C3E50"
-        }}>
-            {getPhaseDisplayName(currentPhase.name)}
+      <div className="flex flex-col items-center w-full max-w-[400px]">
+        {/* Technique info (stacked) */}
+        <div
+          className="text-center mb-8 transition-all duration-300"
+          style={{ transform: textPulse ? "scale(1.02)" : "scale(1)" }}
+        >
+          <h2
+            className="text-xl font-semibold"
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              color: "#2C3E50",
+            }}
+          >
+            {technique.headline || technique.name}
+          </h2>
+          <p className="text-sm mt-1" style={{ color: "#6B6B6B" }}>
+            {technique.bulletPoints[0]}
           </p>
         </div>
 
-        {/* Square path container with centered countdown */}
-        <div className="relative w-[280px] h-[280px] sm:w-[300px] sm:h-[300px]">
-          {/* SVG path */}
-          <svg width="100%" height="100%" viewBox="0 0 300 300" className="animate-scale-in">
-            {/* Dynamic path segments based on technique */}
-            {renderPathSegments()}
+        {/* Sine wave animation */}
+        {renderSineWave()}
 
-            {/* Corner labels */}
-            {[{
-            x: 20,
-            y: 268,
-            label: "A"
-          }, {
-            x: 20,
-            y: 40,
-            label: "B"
-          }, {
-            x: 280,
-            y: 40,
-            label: "C"
-          }, {
-            x: 280,
-            y: 268,
-            label: "D"
-          }].map(({
-            x,
-            y,
-            label
-          }) => <text key={label} x={x} y={y} textAnchor="middle" dominantBaseline="middle" fontSize="14" fontWeight="600" fill="#2C3E50" style={{
-            fontFamily: "Inter, sans-serif"
-          }}>
-                {label}
-              </text>)}
-
-            {/* Moving dot indicator */}
-            <circle cx={dotPos.x} cy={dotPos.y} r="10" fill="#2C3E50" stroke="white" strokeWidth="3" style={{
-            filter: "drop-shadow(0 3px 8px rgba(44, 62, 80, 0.3))",
-            transition: "cx 100ms linear, cy 100ms linear"
-          }} />
-          </svg>
-
-          {/* Centered countdown inside square */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <span className="text-7xl font-bold transition-transform" style={{
-            color: "#2C3E50",
-            transform: timerPulse ? "scale(1.1)" : "scale(1)",
-            transitionDuration: "200ms",
-            transitionTimingFunction: "ease-out"
-          }}>
-              {phaseTimeLeft}
-            </span>
-          </div>
+        {/* Phase icon with countdown */}
+        <div className="flex flex-col items-center animate-fade-in">
+          {renderPhaseIcon()}
+          
+          {/* Phase label */}
+          <p
+            className="mt-4 text-base font-medium"
+            style={{ color: "rgba(44, 62, 80, 0.7)" }}
+          >
+            {currentPhase?.label}
+          </p>
         </div>
 
-        {/* Progress bar - closer to square */}
-        <div className="mt-10 w-[280px] sm:w-[300px] flex flex-col items-center">
-          {/* Progress bar track */}
-          <div className="w-full h-2 rounded-full overflow-hidden" style={{
-          backgroundColor: "rgba(44, 62, 80, 0.2)"
-        }}>
-            <div className="h-full rounded-full" style={{
-            width: `${totalProgress}%`,
-            backgroundColor: "#2C3E50",
-            transition: "width 1000ms linear"
-          }} />
+        {/* Progress bar */}
+        <div className="mt-10 w-full">
+          <div
+            className="w-full h-1.5 rounded-full overflow-hidden"
+            style={{ backgroundColor: "rgba(44, 62, 80, 0.15)" }}
+          >
+            <div
+              className="h-full rounded-full"
+              style={{
+                width: `${cycleProgress}%`,
+                backgroundColor: "#2C3E50",
+                transition: "width 100ms linear",
+              }}
+            />
           </div>
-
-          {/* Phase labels below progress bar - dynamically rendered */}
-          <div className="w-full flex justify-between mt-2 text-xs">
-            {phases.map((p, idx) => <span key={p.name + idx} className="transition-all duration-200" style={{
-            color: phaseIndex === idx ? "#2C3E50" : "#6B6B6B",
-            fontWeight: phaseIndex === idx ? 600 : 400
-          }}>
-                {p.label}
-              </span>)}
-          </div>
+          <p
+            className="text-center text-xs mt-3"
+            style={{ color: "rgba(44, 62, 80, 0.5)" }}
+          >
+            Cycle {currentCycle} of {TOTAL_CYCLES}
+          </p>
         </div>
       </div>
-    </main>;
+
+      <style>{`
+        @keyframes fade-in-up {
+          from {
+            opacity: 0;
+            transform: translateY(12px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
+    </main>
+  );
 };
+
 export default Breathing;
