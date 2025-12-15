@@ -239,8 +239,47 @@ const Breathing = () => {
     }));
   }, [cyclePhases]);
 
+  // Technique descriptions for intro screen
+  const techniqueDescriptions: Record<string, { description: string; benefits: string[] }> = {
+    'sigh': {
+      description: "Your lungs need a reset – this 'sigh' dries them out and signals: Crisis over.",
+      benefits: ["Fastest relief method", "Emergency brake for anxiety", "Clears CO2 instantly"]
+    },
+    'box': {
+      description: "When your head is too loud: This 4-structure syncs your brain like a metronome.",
+      benefits: ["Sharpens mental focus", "Alpha brain wave state", "Used by Navy SEALs"]
+    },
+    '478': {
+      description: "Like a neurological sleep aid – your parasympathetic system flips on like a light switch.",
+      benefits: ["Natural tranquilizer", "Lowers heart rate measurably", "Fall asleep faster"]
+    },
+    'car-rage': {
+      description: "Pursed lips create pressure that mechanically activates your vagus nerve and stops anger chemistry.",
+      benefits: ["Physical anti-rage switch", "Instant calm through pressure", "Diffuses acute anger"]
+    },
+    'reduce-brainfog': {
+      description: "30 fast breaths + hold = adrenaline floods your brain, fog vanishes, pain becomes irrelevant.",
+      benefits: ["Instant mental clarity", "Emergency energy boost", "Overrides fatigue"]
+    },
+    'overthinking-healer': {
+      description: "6 seconds in, 6 out – your heart and brain sync to the ideal rest frequency, thought loops stop.",
+      benefits: ["Cardiac coherence", "Breaks mental loops", "Perfect nervous system balance"]
+    }
+  };
+
+  const getIntroContent = () => {
+    const content = techniqueDescriptions[technique.id];
+    if (content) return content;
+    return {
+      description: technique.bulletPoints[0] || "",
+      benefits: technique.bulletPoints.slice(0, 3)
+    };
+  };
+
   // Intro screen
   if (showIntro) {
+    const introContent = getIntroContent();
+    
     return (
       <main
         className={cn(
@@ -250,6 +289,7 @@ const Breathing = () => {
         style={{ backgroundColor: "#F5E6D3" }}
       >
         <div className="text-center max-w-[380px]">
+          {/* Title only - no subtitle */}
           <h1
             className="text-[28px] md:text-[32px] font-medium leading-[1.3] tracking-[-0.4px] opacity-0"
             style={{
@@ -262,15 +302,17 @@ const Breathing = () => {
             {technique.headline || technique.name}
           </h1>
 
+          {/* Description - italic gray */}
           <p
-            className="mt-4 text-base font-normal opacity-0"
+            className="mt-4 text-base italic opacity-0"
             style={{
-              color: "#6B6B6B",
+              fontFamily: "'Playfair Display', serif",
+              color: "#6B7280",
               animation: "fade-in-up 500ms ease-out forwards",
               animationDelay: "150ms",
             }}
           >
-            {technique.effectLabel}
+            {introContent.description}
           </p>
 
           {/* Benefits list with checkmarks */}
@@ -281,7 +323,7 @@ const Breathing = () => {
               animationDelay: "250ms",
             }}
           >
-            {technique.bulletPoints.slice(0, 3).map((benefit, index) => (
+            {introContent.benefits.map((benefit, index) => (
               <div key={index} className="flex items-center gap-2">
                 <Check className="w-4 h-4" style={{ color: "#10B981" }} />
                 <span className="text-sm" style={{ color: "#6B7280" }}>{benefit}</span>
@@ -361,7 +403,7 @@ const Breathing = () => {
     >
       {/* Center content */}
       <div className="flex flex-col items-center w-full max-w-[400px]">
-        {/* Technique info (stacked) */}
+        {/* Technique title only - no subtitle */}
         <div
           className="text-center mb-8 transition-all duration-300"
           style={{ transform: textPulse ? "scale(1.02)" : "scale(1)" }}
@@ -375,9 +417,6 @@ const Breathing = () => {
           >
             {technique.headline || technique.name}
           </h2>
-          <p className="text-sm mt-1" style={{ color: "#6B6B6B" }}>
-            {technique.bulletPoints[0]}
-          </p>
         </div>
 
         {/* Sine wave animation */}

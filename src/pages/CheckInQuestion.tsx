@@ -52,6 +52,11 @@ const CheckInQuestion = () => {
     return `${count} out of 3 Do Good actions`;
   };
 
+  const getButtonText = (count: number) => {
+    const countWords = ['', 'One', 'Two', 'Three'];
+    return `${countWords[count]} good deed${count > 1 ? 's' : ''} a day`;
+  };
+
   // STATE A: Fullscreen Question Display
   if (currentState === "question") {
     return (
@@ -209,7 +214,7 @@ const CheckInQuestion = () => {
           boxShadow: "0 4px 16px rgba(44, 62, 80, 0.2)",
         }}
       >
-        One good deed a day
+        {getButtonText(doGoodCount)}
       </button>
 
       <style>{`

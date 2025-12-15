@@ -32,12 +32,20 @@ const SineWaveAnimation = ({ phases, currentPhaseIndex, phaseProgress, cycleProg
   }, [phases, width]);
 
   // Get Y position at a given phase and progress within that phase
-  const getYAtPhaseProgress = (phaseName: string, progress: number, prevY: number): number => {
+  const getYAtPhaseProgress = (phaseName: string, progress: number, prevY: number, phaseIndex?: number, phases?: BreathingPhase[]): number => {
     const t = progress / 100;
     
-    if (phaseName === "inhale" || phaseName === "rapid-inhale" || phaseName === "recovery" || phaseName === "double-inhale") {
+    if (phaseName === "inhale" || phaseName === "rapid-inhale" || phaseName === "recovery") {
       // Going UP from current position to top
       return centerY - amplitude * Math.sin(t * Math.PI / 2);
+    }
+    
+    // Double-inhale (second quick inhale in Physiological Sigh) - continues UP to higher peak
+    if (phaseName === "double-inhale") {
+      // Start from where inhale ended (at top) and go slightly higher
+      const startY = centerY - amplitude;
+      const peakY = centerY - amplitude - 15; // Go even higher
+      return startY + (peakY - startY) * Math.sin(t * Math.PI / 2);
     }
     
     if (phaseName === "exhale" || phaseName === "rapid-exhale") {
