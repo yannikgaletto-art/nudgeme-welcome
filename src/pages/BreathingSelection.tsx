@@ -1,25 +1,28 @@
 import { useState, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, Check, Target, Moon, Zap } from "lucide-react";
+import { ArrowLeft, Check, Target, Moon, Zap, Wind, Brain, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
+
 export interface BreathingTechnique {
   id: string;
   name: string;
   headline: string;
   subheadline: string;
-  icon: "target" | "moon" | "zap";
+  icon: "target" | "moon" | "zap" | "wind" | "brain" | "heart";
   duration: string;
   durationSeconds: number;
   effectLabel: string;
   bulletPoints: string[];
   attribution: string;
   badge: string;
+  badgeColor?: string;
   phases: {
     name: string;
     duration: number;
     label: string;
   }[];
 }
+
 export const breathingTechniques: BreathingTechnique[] = [{
   id: "box",
   name: "Box Breathing",
@@ -99,6 +102,74 @@ export const breathingTechniques: BreathingTechnique[] = [{
     duration: 7,
     label: "Long Exhale (7s)"
   }]
+}, {
+  id: "car-rage",
+  name: "Pursed-Lip Breathing",
+  headline: "Car Rage",
+  subheadline: "Pursed-Lip · 12-20 sec",
+  icon: "wind",
+  duration: "12-20 seconds",
+  durationSeconds: 16,
+  effectLabel: "Anger Relief",
+  bulletPoints: ["Calms acute anger fast", "Activates vagus nerve", "Reduces pain anxiety"],
+  attribution: "by Clinical Pain Research",
+  badge: "Anger Relief",
+  phases: [{
+    name: "inhale",
+    duration: 4,
+    label: "Inhale (4s)"
+  }, {
+    name: "exhale",
+    duration: 8,
+    label: "Pursed Exhale (8s)"
+  }]
+}, {
+  id: "reduce-brainfog",
+  name: "Wim-Hof Breathing",
+  headline: "Reduce Brainfog",
+  subheadline: "Wim-Hof · 15-25 sec",
+  icon: "brain",
+  duration: "15-25 seconds",
+  durationSeconds: 20,
+  effectLabel: "Mental Clarity",
+  bulletPoints: ["Instant mental clarity", "Boosts adrenaline safely", "Increases pain tolerance"],
+  attribution: "by Radboud University 2024",
+  badge: "Clear Mind",
+  phases: [{
+    name: "inhale",
+    duration: 3,
+    label: "Deep Inhale (3s)"
+  }, {
+    name: "exhale",
+    duration: 2,
+    label: "Let Go (2s)"
+  }, {
+    name: "hold",
+    duration: 15,
+    label: "Hold (15s)"
+  }]
+}, {
+  id: "overthinking-healer",
+  name: "Resonance Breathing",
+  headline: "Overthinking Healer",
+  subheadline: "Resonance · 12-24 sec",
+  icon: "heart",
+  duration: "12-24 seconds",
+  durationSeconds: 18,
+  effectLabel: "Stop Overthinking",
+  bulletPoints: ["Stops rumination loops", "Cardiac coherence", "Natural pain relief"],
+  attribution: "by Vagus Nerve Research",
+  badge: "Stop Overthinking",
+  badgeColor: "#A7C4BC",
+  phases: [{
+    name: "inhale",
+    duration: 5,
+    label: "Inhale (5s)"
+  }, {
+    name: "exhale",
+    duration: 5,
+    label: "Exhale (5s)"
+  }]
 }];
 
 // Mood to recommended technique mapping
@@ -116,7 +187,7 @@ const moodToTechnique: Record<string, string> = {
 const TechniqueIcon = ({
   icon
 }: {
-  icon: "target" | "moon" | "zap";
+  icon: "target" | "moon" | "zap" | "wind" | "brain" | "heart";
 }) => {
   const iconProps = {
     size: 48,
@@ -130,6 +201,12 @@ const TechniqueIcon = ({
       return <Moon {...iconProps} aria-label="Sleep icon" />;
     case "zap":
       return <Zap {...iconProps} aria-label="Panic reset icon" />;
+    case "wind":
+      return <Wind {...iconProps} aria-label="Anger relief icon" />;
+    case "brain":
+      return <Brain {...iconProps} aria-label="Mental clarity icon" />;
+    case "heart":
+      return <Heart {...iconProps} aria-label="Calm heart icon" />;
   }
 };
 const BreathingSelection = () => {
@@ -213,8 +290,8 @@ we balance you
       </section>
 
       {/* Technique Cards */}
-      <section className="flex-1 px-6 pt-2 pb-6 overflow-y-auto">
-        <div className="max-w-[1080px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+      <section className="flex-1 px-6 pt-2 pb-6 overflow-y-auto scroll-smooth">
+        <div className="max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {sortedTechniques.map((technique, index) => {
           const isRecommended = technique.id === recommendedId;
           return <button key={technique.id} onClick={() => handleSelectTechnique(technique)} className={cn("relative bg-white rounded-[20px] text-left transition-all duration-200 opacity-0 w-full flex flex-col", selectedId === technique.id ? "scale-[0.98]" : "hover:-translate-y-1 hover:shadow-lg")} style={{
@@ -233,7 +310,13 @@ we balance you
               }}>
                       FOR YOU
                     </span>}
-                  {lastUsedId === technique.id && !isRecommended && <span className="absolute top-0 right-0 flex items-center gap-1 text-[11px] font-medium" style={{
+                  {technique.badgeColor && !isRecommended && <span className="absolute top-0 right-0 text-[11px] font-bold uppercase tracking-wide px-3 py-1.5 rounded-full" style={{
+                backgroundColor: technique.badgeColor,
+                color: "#FFFFFF"
+              }}>
+                      POPULAR
+                    </span>}
+                  {lastUsedId === technique.id && !isRecommended && !technique.badgeColor && <span className="absolute top-0 right-0 flex items-center gap-1 text-[11px] font-medium" style={{
                 color: "#6B6B6B"
               }}>
                       <Check size={12} />
