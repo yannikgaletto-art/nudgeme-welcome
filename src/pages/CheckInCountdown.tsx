@@ -3,12 +3,13 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Rocket } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type DoGoodScenario = "office" | "home" | "date" | "stranger" | "friends" | "sport";
+type DoGoodScenario = "office" | "home" | "date" | "stranger" | "friends";
 
 const CheckInCountdown = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const scenario = location.state?.scenario as DoGoodScenario;
+  const selectedQuestion = location.state?.selectedQuestion as string;
   
   const [countdown, setCountdown] = useState(5);
   const [isLaunching, setIsLaunching] = useState(false);
@@ -29,7 +30,12 @@ const CheckInCountdown = () => {
           setIsLaunching(true);
           // Navigate after launch animation
           setTimeout(() => {
-            navigate("/check-in/question", { state: { scenario } });
+            navigate("/check-in/question", { 
+              state: { 
+                scenario,
+                selectedQuestion 
+              } 
+            });
           }, 900);
           return 0;
         }
@@ -39,7 +45,7 @@ const CheckInCountdown = () => {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [navigate, scenario]);
+  }, [navigate, scenario, selectedQuestion]);
 
   const phase = getAnimationPhase();
 

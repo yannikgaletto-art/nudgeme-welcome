@@ -135,12 +135,7 @@ const Breathing = () => {
     }
   }, [navigate, wantsReward, rewardType, doGoodScenario, mood]);
 
-  const handleSkip = useCallback(() => {
-    setIsExiting(true);
-    setTimeout(() => {
-      navigate("/quotes", { state: { mood } });
-    }, 600);
-  }, [navigate, mood]);
+  // Breathing cycle logic
 
   // Breathing cycle logic
   useEffect(() => {
@@ -364,16 +359,6 @@ const Breathing = () => {
       )}
       style={{ backgroundColor: "#F5E6D3" }}
     >
-      {/* Skip button */}
-      <button
-        onClick={handleSkip}
-        className="absolute top-7 right-5 text-[15px] font-normal z-10 transition-all duration-200 hover:underline"
-        style={{ color: "rgba(44, 62, 80, 0.6)" }}
-        aria-label="Skip breathing exercise"
-      >
-        Skip
-      </button>
-
       {/* Center content */}
       <div className="flex flex-col items-center w-full max-w-[400px]">
         {/* Technique info (stacked) */}

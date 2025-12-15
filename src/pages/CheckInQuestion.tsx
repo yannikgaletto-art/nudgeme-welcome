@@ -3,106 +3,81 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { MessageCircle, RefreshCw, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type DoGoodScenario = "office" | "home" | "date" | "stranger" | "friends" | "sport";
+type DoGoodScenario = "office" | "home" | "date" | "stranger" | "friends";
 
-interface Question {
-  id: number;
-  text: string;
-}
-
-// Question database - 10 questions per scenario
-const questionDatabase: Record<DoGoodScenario, Question[]> = {
+// Question database - 10 questions per scenario (for refresh)
+const questionDatabase: Record<DoGoodScenario, string[]> = {
   office: [
-    { id: 1, text: "When was the last time you did something for the first time?" },
-    { id: 2, text: "What's your favorite spot to grab coffee?" },
-    { id: 3, text: "What made you smile this week?" },
-    { id: 4, text: "What's something you're looking forward to?" },
-    { id: 5, text: "What's a skill you'd love to learn?" },
-    { id: 6, text: "What's your go-to lunch spot?" },
-    { id: 7, text: "What's one thing you're proud of this month?" },
-    { id: 8, text: "What's your favorite way to start the day?" },
-    { id: 9, text: "What's a movie or book you'd recommend?" },
-    { id: 10, text: "What's something that surprised you recently?" },
+    "When was the last time you did something for the first time?",
+    "What's your favorite spot to grab coffee?",
+    "What made you smile this week?",
+    "What's something you're looking forward to?",
+    "What's a skill you'd love to learn?",
+    "What's your go-to lunch spot?",
+    "What's one thing you're proud of this month?",
+    "What's your favorite way to start the day?",
+    "What's a movie or book you'd recommend?",
+    "What's something that surprised you recently?",
   ],
   home: [
-    { id: 1, text: "What's one thing you're grateful for today?" },
-    { id: 2, text: "What's your favorite room in your home and why?" },
-    { id: 3, text: "What's a childhood memory that makes you smile?" },
-    { id: 4, text: "What's your comfort food?" },
-    { id: 5, text: "What's one thing that relaxes you instantly?" },
-    { id: 6, text: "What's a dream you still want to pursue?" },
-    { id: 7, text: "What's your favorite season and why?" },
-    { id: 8, text: "What's something you'd tell your younger self?" },
-    { id: 9, text: "What's a hobby you'd love to pick up?" },
-    { id: 10, text: "What's your ideal weekend like?" },
+    "What's one thing you're grateful for today?",
+    "What's your favorite room in your home and why?",
+    "What's a childhood memory that makes you smile?",
+    "What's your comfort food?",
+    "What's one thing that relaxes you instantly?",
+    "What's a dream you still want to pursue?",
+    "What's your favorite season and why?",
+    "What's something you'd tell your younger self?",
+    "What's a hobby you'd love to pick up?",
+    "What's your ideal weekend like?",
   ],
   date: [
-    { id: 1, text: "What's your favorite memory with this person?" },
-    { id: 2, text: "What's something that always makes you laugh?" },
-    { id: 3, text: "What's a place you dream of visiting together?" },
-    { id: 4, text: "What's your idea of a perfect evening?" },
-    { id: 5, text: "What's something you admire about them?" },
-    { id: 6, text: "What's a song that reminds you of them?" },
-    { id: 7, text: "What's your favorite shared experience?" },
-    { id: 8, text: "What's something new you'd like to try together?" },
-    { id: 9, text: "What's your love language?" },
-    { id: 10, text: "What's a goal you have as a couple?" },
+    "What's your favorite memory with this person?",
+    "What's something that always makes you laugh?",
+    "What's a place you dream of visiting together?",
+    "What's your idea of a perfect evening?",
+    "What's something you admire about them?",
+    "What's a song that reminds you of them?",
+    "What's your favorite shared experience?",
+    "What's something new you'd like to try together?",
+    "What's your love language?",
+    "What's a goal you have as a couple?",
   ],
   stranger: [
-    { id: 1, text: "What's the best part of your day so far?" },
-    { id: 2, text: "If you could travel anywhere right now, where?" },
-    { id: 3, text: "What's something you're passionate about?" },
-    { id: 4, text: "What's your favorite way to unwind?" },
-    { id: 5, text: "What's a random fun fact about you?" },
-    { id: 6, text: "What's the last thing that made you laugh?" },
-    { id: 7, text: "What's your favorite local spot around here?" },
-    { id: 8, text: "What's something you're working on right now?" },
-    { id: 9, text: "What's your hidden talent?" },
-    { id: 10, text: "What advice would you give your 18-year-old self?" },
+    "What's the best part of your day so far?",
+    "If you could travel anywhere right now, where?",
+    "What's something you're passionate about?",
+    "What's your favorite way to unwind?",
+    "What's a random fun fact about you?",
+    "What's the last thing that made you laugh?",
+    "What's your favorite local spot around here?",
+    "What's something you're working on right now?",
+    "What's your hidden talent?",
+    "What advice would you give your 18-year-old self?",
   ],
   friends: [
-    { id: 1, text: "What's your favorite memory together?" },
-    { id: 2, text: "What's something you appreciate about our friendship?" },
-    { id: 3, text: "What's been on your mind lately?" },
-    { id: 4, text: "What's a goal you're working towards?" },
-    { id: 5, text: "What's something that made you happy this week?" },
-    { id: 6, text: "What's your current favorite song?" },
-    { id: 7, text: "What's a challenge you've overcome recently?" },
-    { id: 8, text: "What's something you'd like to do together soon?" },
-    { id: 9, text: "What's your biggest dream right now?" },
-    { id: 10, text: "What's something you're grateful for today?" },
+    "What's your favorite memory together?",
+    "What's something you appreciate about our friendship?",
+    "What's been on your mind lately?",
+    "What's a goal you're working towards?",
+    "What's something that made you happy this week?",
+    "What's your current favorite song?",
+    "What's a challenge you've overcome recently?",
+    "What's something you'd like to do together soon?",
+    "What's your biggest dream right now?",
+    "What's something you're grateful for today?",
   ],
-  sport: [
-    { id: 1, text: "What motivates you to stay active?" },
-    { id: 2, text: "What's your favorite post-workout snack?" },
-    { id: 3, text: "What's a fitness goal you're chasing?" },
-    { id: 4, text: "What's the best workout you've done recently?" },
-    { id: 5, text: "Who's your fitness inspiration?" },
-    { id: 6, text: "What's your favorite way to recover after training?" },
-    { id: 7, text: "What's a new exercise you'd like to try?" },
-    { id: 8, text: "What's your go-to pump-up song?" },
-    { id: 9, text: "What's the hardest part of your workout routine?" },
-    { id: 10, text: "What keeps you coming back to the gym?" },
-  ],
-};
-
-const getRandomQuestion = (scenario: DoGoodScenario, excludeIds: number[] = []): Question => {
-  const pool = questionDatabase[scenario] || questionDatabase.office;
-  const available = pool.filter((q) => !excludeIds.includes(q.id));
-  if (available.length === 0) {
-    return pool[Math.floor(Math.random() * pool.length)];
-  }
-  return available[Math.floor(Math.random() * available.length)];
 };
 
 const CheckInQuestion = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const scenario = (location.state?.scenario as DoGoodScenario) || "office";
+  const selectedQuestion = location.state?.selectedQuestion as string;
 
   const [currentState, setCurrentState] = useState<"question" | "completion">("question");
-  const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
-  const [askedQuestionIds, setAskedQuestionIds] = useState<number[]>([]);
+  const [currentQuestion, setCurrentQuestion] = useState<string>(selectedQuestion || "");
+  const [usedQuestions, setUsedQuestions] = useState<string[]>([]);
   const [refreshCounter, setRefreshCounter] = useState(2);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -117,25 +92,37 @@ const CheckInQuestion = () => {
 
   const [doGoodCount, setDoGoodCount] = useState(getDoGoodCount);
 
-  // Load first question on mount
+  // Initialize with selected question from intro page
   useEffect(() => {
-    const question = getRandomQuestion(scenario, []);
-    setCurrentQuestion(question);
-    setAskedQuestionIds([question.id]);
-  }, [scenario]);
+    if (selectedQuestion) {
+      setCurrentQuestion(selectedQuestion);
+      setUsedQuestions([selectedQuestion]);
+    } else {
+      // Fallback: pick random question
+      const pool = questionDatabase[scenario] || questionDatabase.office;
+      const question = pool[Math.floor(Math.random() * pool.length)];
+      setCurrentQuestion(question);
+      setUsedQuestions([question]);
+    }
+  }, [scenario, selectedQuestion]);
 
   const handleRefresh = useCallback(() => {
     if (refreshCounter > 0 && !isRefreshing) {
       setIsRefreshing(true);
       setTimeout(() => {
-        const newQuestion = getRandomQuestion(scenario, askedQuestionIds);
+        const pool = questionDatabase[scenario] || questionDatabase.office;
+        const available = pool.filter((q) => !usedQuestions.includes(q));
+        const newQuestion = available.length > 0
+          ? available[Math.floor(Math.random() * available.length)]
+          : pool[Math.floor(Math.random() * pool.length)];
+        
         setCurrentQuestion(newQuestion);
-        setAskedQuestionIds((prev) => [...prev, newQuestion.id]);
+        setUsedQuestions((prev) => [...prev, newQuestion]);
         setRefreshCounter((prev) => prev - 1);
         setIsRefreshing(false);
       }, 300);
     }
-  }, [refreshCounter, isRefreshing, scenario, askedQuestionIds]);
+  }, [refreshCounter, isRefreshing, scenario, usedQuestions]);
 
   const handleComplete = useCallback(() => {
     // Increment Do Good count
@@ -151,7 +138,7 @@ const CheckInQuestion = () => {
       setShowConfetti(true);
       // Animate progress bar after delay
       setTimeout(() => {
-        setProgressWidth((newCount / 10) * 100);
+        setProgressWidth(Math.min((newCount / 10) * 100, 100));
       }, 700);
     }, 500);
   }, [doGoodCount]);
@@ -202,7 +189,7 @@ const CheckInQuestion = () => {
               color: "#2C3E50",
             }}
           >
-            {currentQuestion?.text || "Loading..."}
+            {currentQuestion || "Loading..."}
           </p>
 
           {/* Divider */}
