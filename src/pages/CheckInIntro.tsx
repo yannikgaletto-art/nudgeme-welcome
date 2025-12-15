@@ -13,69 +13,61 @@ const scenarioConfig: Record<DoGoodScenario, { icon: LucideIcon; label: string }
   friends: { icon: UserPlus, label: "Friends" },
 };
 
-// Question database per scenario
+// Updated question database (English)
 const questions: Record<DoGoodScenario, string[]> = {
-  office: [
-    "When was the last time you did something for the first time?",
-    "What's your favorite spot to grab coffee?",
-    "What made you smile this week?",
-    "What's something you're looking forward to?",
-    "What's a skill you'd love to learn?",
-    "What's your go-to lunch spot?",
-    "What's one thing you're proud of this month?",
-    "What's your favorite way to start the day?",
-    "What's a movie or book you'd recommend?",
-    "What's something that surprised you recently?",
-  ],
-  home: [
-    "What's one thing you're grateful for today?",
-    "What's your favorite room in your home and why?",
-    "What's a childhood memory that makes you smile?",
-    "What's your comfort food?",
-    "What's one thing that relaxes you instantly?",
-    "What's a dream you still want to pursue?",
-    "What's your favorite season and why?",
-    "What's something you'd tell your younger self?",
-    "What's a hobby you'd love to pick up?",
-    "What's your ideal weekend like?",
-  ],
   date: [
-    "What's your favorite memory with this person?",
-    "What's something that always makes you laugh?",
-    "What's a place you dream of visiting together?",
-    "What's your idea of a perfect evening?",
-    "What's something you admire about them?",
-    "What's a song that reminds you of them?",
-    "What's your favorite shared experience?",
-    "What's something new you'd like to try together?",
-    "What's your love language?",
-    "What's a goal you have as a couple?",
-  ],
-  stranger: [
-    "What's the best part of your day so far?",
-    "If you could travel anywhere right now, where?",
-    "What's something you're passionate about?",
-    "What's your favorite way to unwind?",
-    "What's a random fun fact about you?",
-    "What's the last thing that made you laugh?",
-    "What's your favorite local spot around here?",
-    "What's something you're working on right now?",
-    "What's your hidden talent?",
-    "What advice would you give your 18-year-old self?",
+    "What would you have wished someone had told you when you were still young?",
+    "What are you currently learning that you're not very good at yet?",
+    "What would you do if money were no object?",
+    "What would you like to do less of?",
+    "Which personal freedom do you defend the most?",
+    "What was your last turning point?",
+    "Who is influencing you the most right now?",
+    "What are your top 3 thoughts that you think about most in everyday life?",
+    "What was your most important lesson from your studies?",
+    "What was the most beautiful moment of the week?",
   ],
   friends: [
-    "What's your favorite memory together?",
-    "What's something you appreciate about our friendship?",
-    "What's been on your mind lately?",
-    "What's a goal you're working towards?",
-    "What's something that made you happy this week?",
-    "What's your current favorite song?",
-    "What's a challenge you've overcome recently?",
-    "What's something you'd like to do together soon?",
-    "What's your biggest dream right now?",
-    "What's something you're grateful for today?",
+    "What was the most important lesson from your studies?",
+    "What is your picture of the month on your phone?",
+    "When you receive good news, who do you tell first?",
+    "When did you know that friends became your closest friends?",
+    "What does love mean to you?",
+    "Is there something right now that needs to be healed?",
+    "When was the last time you experienced 'standstill' in your life?",
+    "Which time in school was life-changing and traumatic?",
+    "How old is your soul?",
+    "What does 2026 look like in 5 words?",
+  ],
+  office: [
+    "Which anecdote do you tell too often?",
+    "When was the last time you taught someone something?",
+    "How can I help you with XY?",
+    "Who would I invite for coffee?",
+    "How do you bridge a 10-minute waiting period?",
+    "When was the last time you heard a 'no'?",
+    "What has been your personal highlight in the last 6 months?",
+    "When you feel overwhelmed, what helps you get back in balance?",
+    "What made you smile today?",
+    "If people gossip about you, what would they say?",
+  ],
+  home: [
+    "Who would you rather have coffee with on the Himalayas? Barack Obama, Maja Göpel, or The Beatles?",
+    "Can you write in ChatGPT: Tell me something about myself that I don't know yet?",
+    "What does your YouTube algorithm say about you?",
+    "What was one experience this week where you grew a little more?",
+    "Tell me about something beautiful!",
+  ],
+  stranger: [
+    "If you suddenly had free time right now, what would you do?",
+    "What made you smile today?",
+    "What are you thinking about right now?",
+    "If I gave you 1.75 million euros in a backpack right now, tax-free, what would you do with it?",
+    "How much do you believe in destiny?",
   ],
 };
+
+const strangerQuote = "You only fail, if you don't try";
 
 const CheckInIntro = () => {
   const navigate = useNavigate();
@@ -188,6 +180,21 @@ const CheckInIntro = () => {
           </span>
         </div>
 
+        {/* Stranger quote - only shown for stranger scenario */}
+        {scenario === "stranger" && (
+          <p
+            className="mt-6 text-lg italic font-medium text-center opacity-0"
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              color: "#A7C4BC",
+              animation: "fade-in 600ms ease-out forwards",
+              animationDelay: "350ms",
+            }}
+          >
+            "{strangerQuote}"
+          </p>
+        )}
+
         {/* Question card */}
         <div
           className={cn(
@@ -271,7 +278,7 @@ const CheckInIntro = () => {
           animationDelay: "800ms",
         }}
       >
-        Let's do good
+        Let's do good?
       </button>
 
       <style>{`
