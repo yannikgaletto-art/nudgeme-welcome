@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { BreathingTechnique, breathingTechniques } from "./BreathingSelection";
 import { NoseInhaleIcon, MouthExhaleIcon, HoldIcon } from "@/components/breathing/BreathingIcons";
+import SineWaveAnimation from "@/components/breathing/SineWaveAnimation";
+import { Check } from "lucide-react";
 
 type MoodType = "overwhelmed" | "anxious" | "sad" | "nervous" | "neutral" | "calm" | "energized";
 
@@ -219,103 +221,13 @@ const Breathing = () => {
     return null;
   };
 
-  // Render sine wave SVG
-  const renderSineWave = () => {
-    const width = 320;
-    const height = 160;
-    const centerY = height / 2;
-    const amplitude = 50;
-    
-    // Calculate dot position based on cycle progress
-    const dotX = (cycleProgress / 100) * width;
-    
-    // Calculate Y based on current phase
-    let dotY = centerY;
-    const phaseName = currentPhase?.name;
-    
-    if (phaseName === "inhale" || phaseName === "rapid-inhale" || phaseName === "recovery" || phaseName === "double-inhale") {
-      // Going up
-      dotY = centerY - amplitude * Math.sin((phaseProgress / 100) * (Math.PI / 2));
-    } else if (phaseName === "exhale" || phaseName === "rapid-exhale") {
-      // Going down from top
-      dotY = centerY - amplitude + (amplitude * 2) * Math.sin((phaseProgress / 100) * (Math.PI / 2));
-    } else if (phaseName === "hold") {
-      // At top
-      dotY = centerY - amplitude;
-    } else if (phaseName === "retention" || phaseName === "hold2") {
-      // At bottom or center
-      dotY = centerY + amplitude * 0.5;
-    }
-
-    // Generate wave path
-    let pathD = `M 0 ${centerY}`;
-    for (let x = 0; x <= width; x += 4) {
-      const progress = x / width;
-      const y = centerY - amplitude * Math.sin(progress * Math.PI * 2);
-      pathD += ` L ${x} ${y}`;
-    }
-
-    return (
-      <div className="relative w-full max-w-[340px] mx-auto mb-8">
-        <svg
-          width="100%"
-          viewBox={`0 0 ${width} ${height}`}
-          className="overflow-visible"
-        >
-          {/* Guide lines */}
-          <line
-            x1="0" y1={centerY - amplitude}
-            x2={width} y2={centerY - amplitude}
-            stroke="rgba(44, 62, 80, 0.1)"
-            strokeWidth="1"
-            strokeDasharray="4 4"
-          />
-          <line
-            x1="0" y1={centerY + amplitude}
-            x2={width} y2={centerY + amplitude}
-            stroke="rgba(44, 62, 80, 0.1)"
-            strokeWidth="1"
-            strokeDasharray="4 4"
-          />
-          
-          {/* Background wave path */}
-          <path
-            d={pathD}
-            fill="none"
-            stroke="rgba(44, 62, 80, 0.15)"
-            strokeWidth="3"
-            strokeLinecap="round"
-          />
-          
-          {/* Active wave path (up to current position) */}
-          <path
-            d={pathD}
-            fill="none"
-            stroke="#2C3E50"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeDasharray={width}
-            strokeDashoffset={width - (cycleProgress / 100) * width}
-            style={{ transition: "stroke-dashoffset 100ms linear" }}
-          />
-          
-          {/* Moving dot */}
-          <circle
-            cx={Math.max(10, Math.min(dotX, width - 10))}
-            cy={dotY}
-            r="10"
-            fill="#2C3E50"
-            stroke="white"
-            strokeWidth="3"
-            style={{
-              filter: "drop-shadow(0 2px 6px rgba(44, 62, 80, 0.3))",
-              transition: "cx 100ms linear, cy 150ms cubic-bezier(0.4, 0, 0.2, 1)",
-            }}
-          />
-        </svg>
-      </div>
-    );
-  };
+  // Create phases array for SineWaveAnimation
+  const animationPhases = useMemo(() => {
+    return cyclePhases.map(p => ({
+      name: p.name,
+      duration: p.duration,
+    }));
+  }, [cyclePhases]);
 
   // Intro screen
   if (showIntro) {
@@ -341,22 +253,38 @@ const Breathing = () => {
           </h1>
 
           <p
-            className="mt-6 text-base font-normal opacity-0"
+            className="mt-4 text-base font-normal opacity-0"
             style={{
               color: "#6B6B6B",
               animation: "fade-in-up 500ms ease-out forwards",
-              animationDelay: "200ms",
+              animationDelay: "150ms",
             }}
           >
-            {technique.bulletPoints[0]}
+            {technique.effectLabel}
           </p>
 
+          {/* Benefits list with checkmarks */}
+          <div
+            className="mt-6 flex flex-col items-center gap-2.5 opacity-0"
+            style={{
+              animation: "fade-in-up 500ms ease-out forwards",
+              animationDelay: "250ms",
+            }}
+          >
+            {technique.bulletPoints.slice(0, 3).map((benefit, index) => (
+              <div key={index} className="flex items-center gap-2">
+                <Check className="w-4 h-4" style={{ color: "#10B981" }} />
+                <span className="text-sm" style={{ color: "#6B7280" }}>{benefit}</span>
+              </div>
+            ))}
+          </div>
+
           <p
-            className="mt-8 text-lg font-medium opacity-0"
+            className="mt-6 text-lg font-medium opacity-0"
             style={{
               color: "#2C3E50",
               animation: "fade-in-up 500ms ease-out forwards",
-              animationDelay: "300ms",
+              animationDelay: "350ms",
             }}
           >
             3 cycles · {Math.round(cycleDuration * TOTAL_CYCLES / 60)} min
@@ -364,7 +292,7 @@ const Breathing = () => {
 
           <button
             onClick={handleStartBreathing}
-            className="mt-12 w-full max-w-[300px] h-14 rounded-[28px] text-base font-medium transition-all duration-200 hover:scale-[1.02] opacity-0"
+            className="mt-10 w-full max-w-[300px] h-14 rounded-[28px] text-base font-medium transition-all duration-200 hover:scale-[1.02] opacity-0"
             style={{
               backgroundColor: "#2C3E50",
               color: "white",
@@ -466,7 +394,12 @@ const Breathing = () => {
         </div>
 
         {/* Sine wave animation */}
-        {renderSineWave()}
+        <SineWaveAnimation
+          phases={animationPhases}
+          currentPhaseIndex={phaseIndex}
+          phaseProgress={phaseProgress}
+          cycleProgress={cycleProgress}
+        />
 
         {/* Phase icon with countdown */}
         <div className="flex flex-col items-center animate-fade-in">

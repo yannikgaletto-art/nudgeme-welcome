@@ -55,34 +55,13 @@ export const MouthExhaleIcon = ({ seconds, pursed = false, className = "" }: Ico
   </div>
 );
 
-// Finger up icon (for hold)
+// Pause icon (for hold) - universally recognized
 export const HoldIcon = ({ seconds, className = "" }: IconProps) => (
   <div className={`flex flex-col items-center gap-2 ${className}`}>
-    <svg width="48" height="56" viewBox="0 0 48 56" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Index finger pointing up */}
-      <path
-        d="M24 4 L24 32"
-        stroke="#2C3E50"
-        strokeWidth="8"
-        strokeLinecap="round"
-      />
-      {/* Finger tip */}
-      <circle cx="24" cy="4" r="4" fill="#2C3E50" />
-      {/* Folded fingers (simplified) */}
-      <path
-        d="M16 36 C16 32 18 30 20 30 L28 30 C30 30 32 32 32 36 L32 48 C32 52 28 54 24 54 C20 54 16 52 16 48 Z"
-        stroke="#2C3E50"
-        strokeWidth="2"
-        fill="none"
-      />
-      {/* Thumb hint */}
-      <path
-        d="M12 38 C8 38 6 42 8 46"
-        stroke="#2C3E50"
-        strokeWidth="2"
-        strokeLinecap="round"
-        fill="none"
-      />
+    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* Pause bars */}
+      <rect x="14" y="10" width="6" height="28" rx="2" fill="#2C3E50" />
+      <rect x="28" y="10" width="6" height="28" rx="2" fill="#2C3E50" />
     </svg>
     <span className="text-3xl font-bold" style={{ color: "#2C3E50" }}>{seconds}</span>
   </div>
