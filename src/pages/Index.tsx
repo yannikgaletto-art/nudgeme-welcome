@@ -18,9 +18,9 @@ const Index = () => {
 
   return (
     <main className={cn(
-      "min-h-screen bg-background flex flex-col items-center justify-center px-6 relative transition-opacity duration-300",
+      "min-h-screen flex flex-col items-center justify-center px-6 relative transition-opacity duration-300",
       isExiting && "opacity-0"
-    )}>
+    )} style={{ backgroundColor: "#F5E6D3" }}>
       {/* Settings Icon */}
       <button
         onClick={() => navigate("/settings")}

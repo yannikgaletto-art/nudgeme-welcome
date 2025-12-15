@@ -49,11 +49,10 @@ const scenarios: Scenario[] = [
   { id: "date", icon: Heart, label: "On a Date" },
   { id: "stranger", icon: Users, label: "Stranger" },
   { id: "friends", icon: UserPlus, label: "Friends" },
-  { id: "sport", icon: Activity, label: "During Sport" },
 ];
 
 type RewardType = "receive" | "do" | null;
-type DoGoodScenario = "office" | "home" | "date" | "stranger" | "friends" | "sport" | null;
+type DoGoodScenario = "office" | "home" | "date" | "stranger" | "friends" | null;
 
 const MoodSelection = () => {
   const navigate = useNavigate();
@@ -105,9 +104,9 @@ const MoodSelection = () => {
   };
 
   return (
-    <main className="min-h-screen bg-background flex flex-col animate-page-enter">
+    <main className="min-h-screen flex flex-col animate-page-enter" style={{ backgroundColor: "#F5E6D3" }}>
       {/* Fixed Header */}
-      <header className="fixed top-0 left-0 right-0 h-20 bg-background z-10 flex items-center justify-center px-6">
+      <header className="fixed top-0 left-0 right-0 h-20 z-10 flex items-center justify-center px-6" style={{ backgroundColor: "#F5E6D3" }}>
         <button 
           onClick={handleBack} 
           className="absolute left-5 top-7 w-11 h-11 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors duration-200" 
