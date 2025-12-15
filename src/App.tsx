@@ -10,7 +10,6 @@ import BreathingSelection from "./pages/BreathingSelection";
 import CycleSelection from "./pages/CycleSelection";
 import Breathing from "./pages/Breathing";
 import Quotes from "./pages/Quotes";
-import ReceiveGoodQuote from "./pages/ReceiveGoodQuote";
 import SavedQuotes from "./pages/SavedQuotes";
 import Settings from "./pages/Settings";
 import Premium from "./pages/Premium";
@@ -35,7 +34,6 @@ const App = () => (
             <Route path="/cycle-selection" element={<CycleSelection />} />
             <Route path="/breathing" element={<Breathing />} />
             <Route path="/quotes" element={<Quotes />} />
-            <Route path="/receive-good" element={<ReceiveGoodQuote />} />
             <Route path="/saved" element={<SavedQuotes />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/premium" element={<Premium />} />

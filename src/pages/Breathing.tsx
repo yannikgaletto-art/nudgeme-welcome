@@ -132,7 +132,7 @@ const Breathing = () => {
     if (!wantsReward || !rewardType) {
       navigate("/");
     } else if (rewardType === "receive") {
-      navigate("/receive-good", { state: { mood } });
+      navigate("/quotes", { state: { mood } });
     } else if (rewardType === "do") {
       navigate("/check-in/intro", { state: { scenario: doGoodScenario } });
     }
