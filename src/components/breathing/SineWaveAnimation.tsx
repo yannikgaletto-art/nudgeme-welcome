@@ -108,10 +108,6 @@ const SineWaveAnimation = ({ phases, currentPhaseIndex, phaseProgress, cycleProg
     };
   }, [currentPhaseIndex, phaseProgress, cycleProgress, phases, width, centerY, amplitude]);
 
-  // Calculate how much of the path to show (completed portion)
-  const pathLength = width * 1.5; // Approximate path length
-  const completedLength = (cycleProgress / 100) * pathLength;
-
   return (
     <div className="relative w-full max-w-[340px] mx-auto mb-8">
       <svg
@@ -135,17 +131,7 @@ const SineWaveAnimation = ({ phases, currentPhaseIndex, phaseProgress, cycleProg
           strokeDasharray="4 4"
         />
         
-        {/* Background wave path (faded) */}
-        <path
-          d={generatePath}
-          fill="none"
-          stroke="rgba(44, 62, 80, 0.15)"
-          strokeWidth="3"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        
-        {/* Active wave path (completed portion) */}
+        {/* Clean curve path - no progress fill */}
         <path
           d={generatePath}
           fill="none"
@@ -153,8 +139,6 @@ const SineWaveAnimation = ({ phases, currentPhaseIndex, phaseProgress, cycleProg
           strokeWidth="3"
           strokeLinecap="round"
           strokeLinejoin="round"
-          strokeDasharray={pathLength}
-          strokeDashoffset={pathLength - completedLength}
         />
         
         {/* Moving dot - positioned using same formula */}

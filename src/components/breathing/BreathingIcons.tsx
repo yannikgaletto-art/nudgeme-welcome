@@ -1,3 +1,5 @@
+import { Wind, Pause } from "lucide-react";
+
 interface IconProps {
   seconds: number;
   className?: string;
@@ -5,8 +7,8 @@ interface IconProps {
 
 // Nose icon with arrows pointing inward (for inhale)
 export const NoseInhaleIcon = ({ seconds, className = "" }: IconProps) => (
-  <div className={`flex flex-col items-center gap-2 ${className}`}>
-    <svg width="64" height="48" viewBox="0 0 64 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <div className={`flex flex-col items-center gap-1 ${className}`}>
+    <svg width="40" height="40" viewBox="0 0 64 48" fill="none" xmlns="http://www.w3.org/2000/svg">
       {/* Nose outline */}
       <path
         d="M32 8 C32 8 28 20 24 28 C20 36 16 40 16 40 L48 40 C48 40 44 36 40 28 C36 20 32 8 32 8Z"
@@ -26,43 +28,22 @@ export const NoseInhaleIcon = ({ seconds, className = "" }: IconProps) => (
       <path d="M56 32 L46 36 L56 40" stroke="#2C3E50" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
       <line x1="62" y1="36" x2="46" y2="36" stroke="#2C3E50" strokeWidth="2" strokeLinecap="round" />
     </svg>
-    <span className="text-3xl font-bold" style={{ color: "#2C3E50" }}>{seconds}</span>
+    <span className="text-3xl font-semibold tabular-nums" style={{ color: "#2C3E50" }}>{seconds}</span>
   </div>
 );
 
-// Mouth icon with arrows pointing outward (for exhale)
-export const MouthExhaleIcon = ({ seconds, pursed = false, className = "" }: IconProps & { pursed?: boolean }) => (
-  <div className={`flex flex-col items-center gap-2 ${className}`}>
-    <svg width="64" height="48" viewBox="0 0 64 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Face outline hint */}
-      <ellipse cx="32" cy="24" rx="20" ry="16" stroke="#2C3E50" strokeWidth="2" fill="none" opacity="0.3" />
-      {/* Mouth */}
-      {pursed ? (
-        // Pursed lips (small O shape)
-        <ellipse cx="32" cy="24" rx="6" ry="8" stroke="#2C3E50" strokeWidth="2" fill="none" />
-      ) : (
-        // Open mouth
-        <ellipse cx="32" cy="24" rx="10" ry="8" stroke="#2C3E50" strokeWidth="2" fill="none" />
-      )}
-      {/* Left arrow pointing out */}
-      <path d="M12 20 L2 24 L12 28" stroke="#2C3E50" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-      <line x1="12" y1="24" x2="20" y2="24" stroke="#2C3E50" strokeWidth="2" strokeLinecap="round" />
-      {/* Right arrow pointing out */}
-      <path d="M52 20 L62 24 L52 28" stroke="#2C3E50" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-      <line x1="52" y1="24" x2="44" y2="24" stroke="#2C3E50" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-    <span className="text-3xl font-bold" style={{ color: "#2C3E50" }}>{seconds}</span>
+// Wind icon for exhale (clearer and more universal)
+export const ExhaleIcon = ({ seconds, className = "" }: IconProps) => (
+  <div className={`flex flex-col items-center gap-1 ${className}`}>
+    <Wind size={40} strokeWidth={2} style={{ color: "#2C3E50" }} />
+    <span className="text-3xl font-semibold tabular-nums" style={{ color: "#2C3E50" }}>{seconds}</span>
   </div>
 );
 
 // Pause icon (for hold) - universally recognized
 export const HoldIcon = ({ seconds, className = "" }: IconProps) => (
-  <div className={`flex flex-col items-center gap-2 ${className}`}>
-    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Pause bars */}
-      <rect x="14" y="10" width="6" height="28" rx="2" fill="#2C3E50" />
-      <rect x="28" y="10" width="6" height="28" rx="2" fill="#2C3E50" />
-    </svg>
-    <span className="text-3xl font-bold" style={{ color: "#2C3E50" }}>{seconds}</span>
+  <div className={`flex flex-col items-center gap-1 ${className}`}>
+    <Pause size={40} strokeWidth={2} style={{ color: "#2C3E50" }} />
+    <span className="text-3xl font-semibold tabular-nums" style={{ color: "#2C3E50" }}>{seconds}</span>
   </div>
 );
