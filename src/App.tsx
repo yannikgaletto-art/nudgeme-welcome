@@ -12,6 +12,9 @@ import Quotes from "./pages/Quotes";
 import SavedQuotes from "./pages/SavedQuotes";
 import Settings from "./pages/Settings";
 import Premium from "./pages/Premium";
+import CheckInIntro from "./pages/CheckInIntro";
+import CheckInCountdown from "./pages/CheckInCountdown";
+import CheckInQuestion from "./pages/CheckInQuestion";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +35,9 @@ const App = () => (
             <Route path="/saved" element={<SavedQuotes />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/premium" element={<Premium />} />
+            <Route path="/check-in/intro" element={<CheckInIntro />} />
+            <Route path="/check-in/countdown" element={<CheckInCountdown />} />
+            <Route path="/check-in/question" element={<CheckInQuestion />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

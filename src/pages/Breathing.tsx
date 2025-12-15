@@ -76,6 +76,11 @@ const Breathing = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const mood = location.state?.mood as MoodType || "calm";
+  
+  // Session data for post-breathing routing
+  const wantsReward = location.state?.wantsReward as boolean || false;
+  const rewardType = location.state?.rewardType as "receive" | "do" | null || null;
+  const doGoodScenario = location.state?.doGoodScenario as string | null || null;
 
   // Get technique from navigation state or localStorage fallback
   const technique: BreathingTechnique = useMemo(() => {
@@ -118,6 +123,17 @@ const Breathing = () => {
   const [textPulse, setTextPulse] = useState(false);
 
   const currentPhase = cyclePhases[phaseIndex];
+
+  // Post-breathing routing handler
+  const handleWellDoneComplete = useCallback(() => {
+    if (!wantsReward || !rewardType) {
+      navigate("/");
+    } else if (rewardType === "receive") {
+      navigate("/quotes", { state: { mood } });
+    } else if (rewardType === "do") {
+      navigate("/check-in/intro", { state: { scenario: doGoodScenario } });
+    }
+  }, [navigate, wantsReward, rewardType, doGoodScenario, mood]);
 
   const handleSkip = useCallback(() => {
     setIsExiting(true);
@@ -165,7 +181,7 @@ const Breathing = () => {
             setTimeout(() => {
               setIsExiting(true);
               setTimeout(() => {
-                navigate("/quotes", { state: { mood } });
+                handleWellDoneComplete();
               }, 600);
             }, 2000);
             return;
@@ -188,7 +204,7 @@ const Breathing = () => {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [showIntro, showWellDone, navigate, mood, cyclePhases, cycleDuration]);
+  }, [showIntro, showWellDone, handleWellDoneComplete, cyclePhases, cycleDuration]);
 
   // Handle manual start
   const handleStartBreathing = useCallback(() => {
