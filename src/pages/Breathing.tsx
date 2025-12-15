@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { BreathingTechnique, breathingTechniques } from "./BreathingSelection";
-import { NoseInhaleIcon, MouthExhaleIcon, HoldIcon } from "@/components/breathing/BreathingIcons";
+import { NoseInhaleIcon, ExhaleIcon, HoldIcon } from "@/components/breathing/BreathingIcons";
 import SineWaveAnimation from "@/components/breathing/SineWaveAnimation";
 import { Check } from "lucide-react";
 
@@ -210,8 +210,7 @@ const Breathing = () => {
     }
     
     if (phaseName === "exhale" || phaseName === "rapid-exhale") {
-      const isPursed = currentPhase.isPursed || technique.id === "car-rage";
-      return <MouthExhaleIcon seconds={phaseTimeLeft} pursed={isPursed} />;
+      return <ExhaleIcon seconds={phaseTimeLeft} />;
     }
     
     if (phaseName === "hold" || phaseName === "hold2" || phaseName === "retention") {
@@ -359,19 +358,6 @@ const Breathing = () => {
         Skip
       </button>
 
-      {/* Cycle indicator */}
-      <div className="absolute top-7 left-5 flex gap-2">
-        {Array.from({ length: TOTAL_CYCLES }).map((_, i) => (
-          <div
-            key={i}
-            className="w-2.5 h-2.5 rounded-full transition-all duration-300"
-            style={{
-              backgroundColor: i < currentCycle ? "#2C3E50" : "rgba(44, 62, 80, 0.2)",
-            }}
-          />
-        ))}
-      </div>
-
       {/* Center content */}
       <div className="flex flex-col items-center w-full max-w-[400px]">
         {/* Technique info (stacked) */}
@@ -401,41 +387,39 @@ const Breathing = () => {
           cycleProgress={cycleProgress}
         />
 
-        {/* Phase icon with countdown */}
-        <div className="flex flex-col items-center animate-fade-in">
+        {/* Phase icon with countdown and label */}
+        <div className="flex flex-col items-center mt-8">
           {renderPhaseIcon()}
           
-          {/* Phase label */}
+          {/* Phase label - always visible */}
           <p
-            className="mt-4 text-base font-medium"
-            style={{ color: "rgba(44, 62, 80, 0.7)" }}
+            className="mt-2 text-base font-medium"
+            style={{ color: "#2C3E50" }}
           >
             {currentPhase?.label}
           </p>
         </div>
+      </div>
 
-        {/* Progress bar */}
-        <div className="mt-10 w-full">
-          <div
-            className="w-full h-1.5 rounded-full overflow-hidden"
-            style={{ backgroundColor: "rgba(44, 62, 80, 0.15)" }}
-          >
+      {/* Cycle counter at bottom */}
+      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-3">
+        <div className="flex gap-2">
+          {Array.from({ length: TOTAL_CYCLES }).map((_, i) => (
             <div
-              className="h-full rounded-full"
+              key={i}
+              className="w-2.5 h-2.5 rounded-full transition-all duration-300"
               style={{
-                width: `${cycleProgress}%`,
-                backgroundColor: "#2C3E50",
-                transition: "width 100ms linear",
+                backgroundColor: i < currentCycle ? "#2C3E50" : "rgba(44, 62, 80, 0.2)",
               }}
             />
-          </div>
-          <p
-            className="text-center text-xs mt-3"
-            style={{ color: "rgba(44, 62, 80, 0.5)" }}
-          >
-            Cycle {currentCycle} of {TOTAL_CYCLES}
-          </p>
+          ))}
         </div>
+        <p
+          className="text-base"
+          style={{ color: "#6B7280" }}
+        >
+          Cycle {currentCycle} of {TOTAL_CYCLES}
+        </p>
       </div>
 
       <style>{`
