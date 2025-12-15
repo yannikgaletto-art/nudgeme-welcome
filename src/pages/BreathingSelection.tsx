@@ -221,6 +221,9 @@ const BreathingSelection = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const mood = location.state?.mood || "calm";
+  const wantsReward = location.state?.wantsReward || false;
+  const rewardType = location.state?.rewardType || null;
+  const doGoodScenario = location.state?.doGoodScenario || null;
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   // Determine recommended technique based on mood
@@ -250,7 +253,10 @@ const BreathingSelection = () => {
       navigate("/breathing", {
         state: {
           mood,
-          technique
+          technique,
+          wantsReward,
+          rewardType,
+          doGoodScenario
         }
       });
     }, 200);
