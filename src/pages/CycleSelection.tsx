@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Check } from "lucide-react";
+import { Check, ArrowLeft } from "lucide-react";
 import { BreathingTechnique } from "./BreathingSelection";
 
 const CycleSelection = () => {
@@ -15,6 +15,12 @@ const CycleSelection = () => {
   const wantsReward = location.state?.wantsReward || false;
   const rewardType = location.state?.rewardType || null;
   const doGoodScenario = location.state?.doGoodScenario || null;
+
+  const handleBack = () => {
+    navigate("/breathing-selection", {
+      state: { mood, wantsReward, rewardType, doGoodScenario },
+    });
+  };
 
   const handleContinue = () => {
     navigate("/breathing", {
@@ -36,9 +42,18 @@ const CycleSelection = () => {
 
   return (
     <main
-      className="min-h-screen w-full flex flex-col items-center justify-center px-6"
+      className="min-h-screen w-full flex flex-col items-center justify-center px-6 relative"
       style={{ backgroundColor: "#F5E6D3" }}
     >
+      {/* Back Button */}
+      <button
+        onClick={handleBack}
+        className="absolute top-7 left-5 flex items-center gap-2 text-[#2C3E50] hover:opacity-70 transition-opacity"
+        aria-label="Go back to breathing technique selection"
+      >
+        <ArrowLeft size={24} />
+        <span className="text-base font-medium">Back</span>
+      </button>
       {/* Title */}
       <h1
         className="text-[32px] font-semibold text-center opacity-0"

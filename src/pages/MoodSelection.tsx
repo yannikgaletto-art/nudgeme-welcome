@@ -114,7 +114,10 @@ const MoodSelection = () => {
         >
           <ArrowLeft size={24} />
         </button>
-        <h1 className="font-sans font-semibold text-foreground tracking-tight text-2xl sm:text-4xl">
+        <h1 
+          className="text-[32px] font-semibold tracking-tight"
+          style={{ fontFamily: "'Playfair Display', serif", color: "#2C3E50" }}
+        >
           How are you feeling?
         </h1>
       </header>
