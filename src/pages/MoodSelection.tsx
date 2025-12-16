@@ -135,11 +135,11 @@ const MoodSelection = () => {
                   className={cn(
                     "relative w-[120px] h-[120px] sm:w-[140px] sm:h-[140px] mx-auto",
                     "rounded-2xl flex flex-col items-center justify-center",
-                    "transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)]",
-                    "border-[1.5px] opacity-0 animate-fade-in",
+                    "transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
+                    "border-2 opacity-0 animate-fade-in",
                     isSelected 
                       ? "bg-[#2C3E50] border-[#2C3E50] shadow-lg" 
-                      : "bg-background border-[#E5E7EB] hover:border-[#2C3E50]/30",
+                      : "bg-transparent border-[#2C3E50] hover:bg-[#2C3E50]/5 hover:scale-[1.02]",
                     "active:scale-95"
                   )}
                   style={{ animationDelay: `${index * 80}ms` }}
@@ -155,13 +155,13 @@ const MoodSelection = () => {
                     size={36} 
                     strokeWidth={2}
                     className={cn(
-                      "mb-3 transition-colors duration-200",
+                      "mb-3 transition-colors duration-300",
                       isSelected ? "text-white" : "text-[#2C3E50]"
                     )} 
                   />
                   <span className={cn(
-                    "text-sm font-medium transition-colors duration-200",
-                    isSelected ? "text-white" : "text-foreground"
+                    "text-sm font-medium transition-colors duration-300",
+                    isSelected ? "text-white" : "text-[#2C3E50]"
                   )}>
                     {mood.label}
                   </span>
@@ -201,16 +201,21 @@ const MoodSelection = () => {
                     <button
                       onClick={() => handleRewardTypeSelect("receive")}
                       className={cn(
-                        "h-[120px] rounded-2xl flex flex-col items-center justify-center",
-                        "border-[1.5px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
+                        "relative h-[120px] rounded-2xl flex flex-col items-center justify-center",
+                        "border-2 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
                         "animate-fade-in",
                         rewardType === "receive"
-                          ? "border-[#2C3E50] border-2 shadow-md w-full"
-                          : "border-[#E5E7EB] bg-background hover:border-[#2C3E50]/30"
+                          ? "bg-[#2C3E50] border-[#2C3E50] shadow-md w-full"
+                          : "bg-transparent border-[#2C3E50] hover:bg-[#2C3E50]/5 hover:scale-[1.02]"
                       )}
                     >
-                      <Sparkles size={32} strokeWidth={2} className="text-[#2C3E50] mb-2" />
-                      <span className="text-sm font-semibold text-foreground">Receive Good</span>
+                      {rewardType === "receive" && (
+                        <div className="absolute top-2 right-2 animate-fade-in">
+                          <Check size={16} className="text-white" />
+                        </div>
+                      )}
+                      <Sparkles size={32} strokeWidth={2} className={cn("mb-2 transition-colors duration-300", rewardType === "receive" ? "text-white" : "text-[#2C3E50]")} />
+                      <span className={cn("text-sm font-semibold transition-colors duration-300", rewardType === "receive" ? "text-white" : "text-[#2C3E50]")}>Receive Good</span>
                     </button>
                   )}
 
@@ -219,16 +224,21 @@ const MoodSelection = () => {
                     <button
                       onClick={() => handleRewardTypeSelect("do")}
                       className={cn(
-                        "h-[120px] rounded-2xl flex flex-col items-center justify-center",
-                        "border-[1.5px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
+                        "relative h-[120px] rounded-2xl flex flex-col items-center justify-center",
+                        "border-2 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
                         "animate-fade-in",
                         rewardType === "do"
-                          ? "border-[#2C3E50] border-2 shadow-md w-full"
-                          : "border-[#E5E7EB] bg-background hover:border-[#2C3E50]/30"
+                          ? "bg-[#2C3E50] border-[#2C3E50] shadow-md w-full"
+                          : "bg-transparent border-[#2C3E50] hover:bg-[#2C3E50]/5 hover:scale-[1.02]"
                       )}
                     >
-                      <Heart size={32} strokeWidth={2} className="text-[#2C3E50] mb-2" />
-                      <span className="text-sm font-semibold text-foreground">Do Good</span>
+                      {rewardType === "do" && (
+                        <div className="absolute top-2 right-2 animate-fade-in">
+                          <Check size={16} className="text-white" />
+                        </div>
+                      )}
+                      <Heart size={32} strokeWidth={2} className={cn("mb-2 transition-colors duration-300", rewardType === "do" ? "text-white" : "text-[#2C3E50]")} />
+                      <span className={cn("text-sm font-semibold transition-colors duration-300", rewardType === "do" ? "text-white" : "text-[#2C3E50]")}>Do Good</span>
                     </button>
                   )}
                 </div>
@@ -249,19 +259,24 @@ const MoodSelection = () => {
                         key={scenario.id}
                         onClick={() => handleScenarioSelect(scenario.id as DoGoodScenario)}
                         className={cn(
-                          "h-[100px] rounded-2xl flex flex-col items-center justify-center",
-                          "border-[1.5px] transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)]",
+                          "relative h-[100px] rounded-2xl flex flex-col items-center justify-center",
+                          "border-2 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
                           isSelected
-                            ? "border-[#2C3E50] border-2 shadow-md"
-                            : "border-[#E5E7EB] bg-background hover:border-[#2C3E50]/30"
+                            ? "bg-[#2C3E50] border-[#2C3E50] shadow-md"
+                            : "bg-transparent border-[#2C3E50] hover:bg-[#2C3E50]/5 hover:scale-[1.02]"
                         )}
                       >
+                        {isSelected && (
+                          <div className="absolute top-2 right-2 animate-fade-in">
+                            <Check size={16} className="text-white" />
+                          </div>
+                        )}
                         <IconComponent 
                           size={28} 
                           strokeWidth={2} 
-                          className="text-[#2C3E50] mb-2" 
+                          className={cn("mb-2 transition-colors duration-300", isSelected ? "text-white" : "text-[#2C3E50]")} 
                         />
-                        <span className="text-[13px] font-medium text-foreground">
+                        <span className={cn("text-[13px] font-medium transition-colors duration-300", isSelected ? "text-white" : "text-[#2C3E50]")}>
                           {scenario.label}
                         </span>
                       </button>
