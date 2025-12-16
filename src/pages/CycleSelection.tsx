@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { Check } from "lucide-react";
 import { BreathingTechnique } from "./BreathingSelection";
 
 const CycleSelection = () => {
@@ -70,46 +71,53 @@ const CycleSelection = () => {
           animationDelay: "200ms",
         }}
       >
-        {cycleOptions.map(({ count, duration }) => (
-          <button
-            key={count}
-            onClick={() => setSelectedCycles(count)}
-            className={cn(
-              "w-[140px] h-[140px] md:w-[160px] md:h-[160px] rounded-[20px] flex flex-col items-center justify-center gap-3 cursor-pointer transition-all duration-200"
-            )}
-            style={{
-              backgroundColor: selectedCycles === count ? "rgba(167, 196, 188, 0.1)" : "#FFFFFF",
-              border: selectedCycles === count ? "3px solid #2C3E50" : "2px solid #E5E7EB",
-              transform: selectedCycles === count ? "scale(1.05)" : "scale(1)",
-              boxShadow: selectedCycles === count 
-                ? "0 4px 16px rgba(44, 62, 80, 0.15)" 
-                : "0 2px 8px rgba(0, 0, 0, 0.04)",
-            }}
-            aria-label={`Select ${count} cycles, approximately ${duration}`}
-          >
-            <span
-              className="text-[48px] font-bold"
-              style={{
-                fontFamily: "'Playfair Display', serif",
-                color: "#2C3E50",
-              }}
+        {cycleOptions.map(({ count, duration }) => {
+          const isSelected = selectedCycles === count;
+          return (
+            <button
+              key={count}
+              onClick={() => setSelectedCycles(count)}
+              className={cn(
+                "relative w-[140px] h-[140px] md:w-[160px] md:h-[160px] rounded-[20px] flex flex-col items-center justify-center gap-3 cursor-pointer transition-all duration-300",
+                isSelected 
+                  ? "bg-[#2C3E50] border-2 border-[#2C3E50] shadow-lg scale-105" 
+                  : "bg-transparent border-2 border-[#2C3E50] hover:bg-[#2C3E50]/5 hover:scale-[1.02]"
+              )}
+              aria-label={`Select ${count} cycles, approximately ${duration}`}
             >
-              {count}
-            </span>
-            <span
-              className="text-sm font-medium"
-              style={{ color: "#6B7280" }}
-            >
-              Cycles
-            </span>
-            <span
-              className="text-xs"
-              style={{ color: "#9CA3AF" }}
-            >
-              {duration}
-            </span>
-          </button>
-        ))}
+              {isSelected && (
+                <div className="absolute top-2 right-2 animate-fade-in">
+                  <Check size={16} className="text-white" />
+                </div>
+              )}
+              <span
+                className={cn(
+                  "text-[48px] font-bold transition-colors duration-300",
+                  isSelected ? "text-white" : "text-[#2C3E50]"
+                )}
+                style={{ fontFamily: "'Playfair Display', serif" }}
+              >
+                {count}
+              </span>
+              <span
+                className={cn(
+                  "text-sm font-medium transition-colors duration-300",
+                  isSelected ? "text-white/90" : "text-[#2C3E50]"
+                )}
+              >
+                Cycles
+              </span>
+              <span
+                className={cn(
+                  "text-xs transition-colors duration-300",
+                  isSelected ? "text-white/70" : "text-[#6B7280]"
+                )}
+              >
+                {duration}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Continue Button */}
